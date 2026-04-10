@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1a3a2a">
+<meta name="description" content="골프 동호회 조 편성기 - 남여 균형, 슬로우 플레이어 분리, 3개월 이력 관리">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="골프조편성">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<title>골프 조 편성기</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g0:#0f2318;--g1:#1a3a2a;--g2:#2d6a4f;--g3:#52b788;--g4:#95d5b2;
+  --gold:#d4a017;--gold-l:#f0c040;--cream:#faf7f0;
+  --slow:#e05c3a;--slow-l:#ff9f85;--pink:#e879a0;--blue:#5ba4e6;--r:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--g1);min-height:100vh;min-height:100dvh;color:var(--cream);overflow-x:hidden;padding-bottom:env(safe-area-inset-bottom)}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(170deg,transparent 0,transparent 38px,rgba(255,255,255,.013) 38px,rgba(255,255,255,.013) 40px);pointer-events:none;z-index:0}
+#app{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:24px 14px 100px}
+
+/* Typography */
+.han{font-family:'Black Han Sans',sans-serif}
+
+/* Header */
+.hdr{text-align:center;margin-bottom:24px}
+.hdr .ico{font-size:42px;display:block;animation:sway 3s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+.hdr h1{font-family:'Black Han Sans',sans-serif;font-size:clamp(22px,5vw,36px);letter-spacing:4px;color:var(--gold-l);text-shadow:0 2px 18px rgba(212,160,23,.4);margin:8px 0 4px}
+.hdr p{color:var(--g4);font-size:12px;letter-spacing:2px}
+
+/* Tabs */
+.tabs{display:flex;gap:3px;background:rgba(0,0,0,.3);border-radius:12px;padding:4px;margin-bottom:18px;position:sticky;top:8px;z-index:50;backdrop-filter:blur(12px)}
+.tab{flex:1;padding:10px 4px;border:none;border-radius:9px;background:transparent;color:rgba(255,255,255,.4);font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;letter-spacing:.2px}
+.tab.on{background:var(--g2);color:var(--gold-l);font-weight:700}
+.panel{display:none}.panel.on{display:block}
+
+/* Cards */
+.card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-radius:var(--r);padding:20px;margin-bottom:14px;backdrop-filter:blur(8px)}
+.ctitle{font-family:'Black Han Sans',sans-serif;font-size:14px;letter-spacing:2px;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.ctitle::before{content:'';width:3px;height:15px;background:var(--gold);border-radius:2px;flex-shrink:0}
+
+/* Form inputs */
+input,select,textarea{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:9px;padding:10px 13px;color:var(--cream);font-family:'Noto Sans KR',sans-serif;font-size:14px;outline:none;transition:border-color .2s;width:100%;-webkit-appearance:none}
+input:focus,select:focus{border-color:var(--g3)}
+input::placeholder{color:rgba(255,255,255,.22)}
+select option{background:#1a3a2a}
+label.lbl{font-size:11px;color:var(--g4);margin-bottom:4px;display:block}
+.field{display:flex;flex-direction:column;gap:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+@media(max-width:500px){.grid3,.grid4{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr 1fr}}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:9px 15px;border-radius:9px;border:none;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:500;transition:all .18s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.btn-sm{padding:6px 11px;font-size:12px;border-radius:7px}
+.btn-block{width:100%;padding:15px;font-family:'Black Han Sans',sans-serif;font-size:18px;letter-spacing:3px}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-l));color:var(--g0);box-shadow:0 4px 18px rgba(212,160,23,.28)}
+.btn-gold:active{transform:scale(.97)}
+.btn-outline{background:transparent;border:1px solid var(--g3);color:var(--g3)}
+.btn-ghost{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.65)}
+.btn-danger{background:rgba(224,92,58,.1);border:1px solid rgba(224,92,58,.28);color:var(--slow-l)}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* Toggle */
+.tog-wrap{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.tog-label{font-size:13px;color:rgba(255,255,255,.5)}
+.tog{width:40px;height:22px;border-radius:24px;background:rgba(255,255,255,.15);position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;border:none;padding:0}
+.tog.on{background:var(--g3)}
+.tog::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s}
+.tog.on::after{left:21px}
+
+/* Chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px;min-height:36px}
+.chip{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);border-radius:50px;padding:5px 13px;font-size:13px;cursor:pointer;transition:all .17s;user-select:none;display:inline-flex;align-items:center;gap:4px}
+.chip:active{transform:scale(.95)}
+.chip.sel{background:rgba(82,183,136,.14);border-color:var(--g3);color:var(--g4)}
+.chip.slow-border{border-color:rgba(224,92,58,.4)}
+.chip.slow-on{background:rgba(224,92,58,.12);border-color:var(--slow);color:var(--slow-l);font-weight:700}
+
+/* Badges */
+.badge{border-radius:50px;padding:3px 10px;font-size:11px;display:inline-flex;align-items:center;gap:3px}
+.badge-slow{background:rgba(224,92,58,.13);border:1px solid rgba(224,92,58,.28);color:var(--slow-l)}
+.badge-norm{background:rgba(82,183,136,.09);border:1px solid rgba(82,183,136,.22);color:var(--g4)}
+.badge-m{background:rgba(91,164,230,.12);border:1px solid rgba(91,164,230,.28);color:var(--blue)}
+.badge-f{background:rgba(232,121,160,.12);border:1px solid rgba(232,121,160,.28);color:var(--pink)}
+.cnt-pill{background:var(--g2);border-radius:50px;padding:4px 12px;font-size:13px;color:var(--g4)}
+.cnt-pill b{color:var(--gold-l);font-size:14px}
+
+/* Table */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{padding:7px 8px;text-align:left;color:var(--g4);font-weight:500;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap}
+.tbl td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.ovx{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* Team result cards */
+.t-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+@media(max-width:480px){.t-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:340px){.t-grid{grid-template-columns:1fr}}
+.tcard{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:13px;overflow:hidden;animation:up .38s ease both}
+.tcard.drag-over{outline:2px dashed var(--g3);background:rgba(82,183,136,.07)}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.thd{background:var(--g2);padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.tnum{font-family:'Black Han Sans',sans-serif;font-size:14px;color:var(--gold-l);letter-spacing:2px}
+.tbody{padding:11px 13px;display:flex;flex-direction:column;gap:6px}
+.mrow{display:flex;align-items:center;gap:6px;font-size:13px;padding:2px 3px;border-radius:5px;cursor:grab;-webkit-user-drag:element}
+.mrow:active{cursor:grabbing}
+.mdot{width:5px;height:5px;border-radius:50%;background:var(--g3);flex-shrink:0}
+.mrow.slow .mdot{background:var(--slow)}
+.mrow.slow .mname{color:var(--slow-l)}
+
+/* History */
+.hi{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.hi-hdr{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer}
+.hi-date{font-family:'Black Han Sans',sans-serif;font-size:13px;color:var(--gold);letter-spacing:1px}
+.hi-meta{font-size:11px;color:rgba(255,255,255,.38);margin-top:2px}
+.hi-body{display:none;padding:0 14px 14px}
+.hi-body.open{display:block}
+.ht-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:9px;margin-top:10px}
+@media(max-width:480px){.ht-grid{grid-template-columns:1fr 1fr}}
+
+/* Error / warn */
+.err-box{background:rgba(224,92,58,.12);border:1px solid rgba(224,92,58,.3);border-radius:9px;padding:10px 13px;font-size:13px;color:var(--slow-l);margin-bottom:10px}
+.warn-box{background:rgba(212,160,23,.09);border:1px solid rgba(212,160,23,.28);border-radius:9px;padding:9px 13px;font-size:12px;color:var(--gold-l);margin-bottom:10px}
+.hint{font-size:11px;color:rgba(255,255,255,.28);line-height:1.6}
+
+/* Divider */
+.divider{border:none;border-top:1px solid rgba(255,255,255,.07);margin:20px 0}
+
+/* Scroll fix */
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px}
+
+/* Toast */
+.toast{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:rgba(45,106,79,.95);border:1px solid var(--g3);color:var(--cream);padding:10px 22px;border-radius:50px;font-size:13px;opacity:0;transition:all .3s;z-index:999;white-space:nowrap;backdrop-filter:blur(8px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Install banner */
+.install-bar{background:linear-gradient(135deg,var(--g2),#1e4a35);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.install-bar p{font-size:13px;color:var(--g4);line-height:1.5}
+.install-bar p b{color:var(--gold-l)}
+
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Header -->
+  <div class="hdr">
+    <span class="ico">⛳</span>
+    <h1>골프 조 편성기</h1>
+    <p>GOLF TEAM DRAW SYSTEM</p>
+  </div>
+
+  <!-- Install PWA banner -->
+  <div class="install-bar" id="installBar" style="display:none">
+    <p>📲 홈 화면에 추가하면 앱처럼 사용할 수 있어요<br><b>Safari → 공유 → 홈 화면에 추가</b></p>
+    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('installBar').style.display='none'">닫기</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" role="tablist">
+    <button class="tab on" onclick="switchTab('members')" role="tab">👥 회원 관리</button>
+    <button class="tab" onclick="switchTab('draw')" role="tab">🏌️ 조 편성</button>
+    <button class="tab" onclick="switchTab('history')" role="tab">📋 이력</button>
+  </div>
+
+  <!-- ═══ TAB: MEMBERS ═══ -->
+  <div id="tab-members" class="panel on">
+    <!-- Form -->
+    <div class="card" id="formCard">
+      <div class="ctitle" id="formTitle">신규 회원 등록</div>
+      <div class="grid4">
+        <div class="field"><label class="lbl">닉네임 *</label><input id="fNick" placeholder="독수리" maxlength="12"></div>
+        <div class="field"><label class="lbl">실명 *</label><input id="fName" placeholder="김철수" maxlength="12"></div>
+        <div class="field"><label class="lbl">전화 뒷자리</label><input id="fPhone" placeholder="1234" maxlength="4" inputmode="numeric"></div>
+        <div class="field"><label class="lbl">성별</label>
+          <select id="fGender">
+            <option value="M">👨 남성</option>
+            <option value="F">👩 여성</option>
+          </select>
+        </div>
+      </div>
+      <div class="tog-wrap" style="margin-bottom:14px">
+        <span class="tog-label">슬로우 플레이어</span>
+        <button type="button" class="tog" id="fSlow" onclick="this.classList.toggle('on')"></button>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost btn-sm" id="fCancelBtn" onclick="cancelEdit()" style="display:none">취소</button>
+        <button class="btn btn-outline btn-sm" onclick="saveMember()" id="fSaveBtn">✚ 등록하기</button>
+      </div>
+    </div>
+
+    <!-- List -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="han" style="font-size:14px;color:var(--gold);letter-spacing:2px">전체 회원</span>
+          <span id="mTotal" style="font-size:12px;color:rgba(255,255,255,.35)"></span>
+          <span id="mGender" style="font-size:12px"></span>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost btn-sm" onclick="exportJSON()">📥 내보내기</button>
+          <label class="btn btn-ghost btn-sm" style="cursor:pointer">📤 가져오기<input type="file" accept=".json" style="display:none" onchange="importJSON(event)"></label>
+        </div>
+      </div>
+      <div style="position:relative;margin-bottom:12px">
+        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:13px">🔍</span>
+        <input id="mSearch" placeholder="닉네임 또는 실명 검색..." style="padding-left:32px" oninput="renderMembers()">
+      </div>
+      <div class="ovx">
+        <table class="tbl"><thead><tr>
+          <th>닉네임</th><th>실명</th><th>성별</th><th>전화</th><th>구분</th><th></th>
+        </tr></thead><tbody id="mBody"></tbody></table>
+      </div>
+      <div id="mEmpty" style="text-align:center;padding:28px;color:rgba(255,255,255,.22);font-size:13px;display:none">등록된 회원이 없습니다</div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: DRAW ═══ -->
+  <div id="tab-draw" class="panel">
+    <div class="card">
+      <div class="ctitle">모임 정보</div>
+      <div class="grid2">
+        <div class="field"><label class="lbl">모임 날짜</label><input type="date" id="drawDate"></div>
+        <div class="field"><label class="lbl">메모 (선택)</label><input id="drawNote" placeholder="예) 5월 정기모임, OO CC"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+        <span class="han" style="font-size:14px;color:var(--gold);letter-spacing:2px">참가자 선택</span>
+        <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
+          <span id="selGender" style="font-size:12px"></span>
+          <span class="cnt-pill">선택 <b id="selCnt">0</b>명 · <b id="selTeams">0</b>팀</span>
+        </div>
+      </div>
+      <p class="hint" style="margin-bottom:10px">탭하여 이번 모임 참가자를 선택하세요</p>
+      <div class="chips" id="pGrid"><span style="color:rgba(255,255,255,.2);font-size:13px">회원을 먼저 등록해 주세요</span></div>
+      <div class="btn-row" style="margin-top:10px">
+        <button class="btn btn-ghost btn-sm" onclick="selAll()">전체 선택</button>
+        <button class="btn btn-ghost btn-sm" onclick="selNone()">전체 해제</button>
+      </div>
+    </div>
+
+    <div class="card" id="slowCard" style="display:none">
+      <div class="ctitle">슬로우 플레이어 (이번 모임)</div>
+      <p class="hint" style="margin-bottom:10px">기본 지정 슬로우가 자동 표시됩니다. 탭하여 변경 가능합니다.</p>
+      <div class="chips" id="slowRow"></div>
+      <p id="slowMsg" style="margin-top:8px;font-size:11px;color:rgba(255,255,255,.32)"></p>
+    </div>
+
+    <div id="drawErr" class="err-box" style="display:none"></div>
+    <button class="btn btn-gold btn-block" onclick="draw()">🏌️ 조 편성 시작</button>
+    <p class="hint" style="text-align:center;margin-top:6px;margin-bottom:16px">남/여 균형 · 슬로우 분리 · 최근 3개월 동일팀 회피</p>
+
+    <!-- Result -->
+    <div id="resSection" style="display:none">
+      <hr class="divider">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <h2 class="han" style="font-size:17px;color:var(--gold-l);letter-spacing:2px">⛳ 조 편성 결과</h2>
+        <div class="btn-row">
+          <button class="btn btn-outline btn-sm" onclick="draw()">🔀 다시 뽑기</button>
+          <button class="btn btn-ghost btn-sm" id="saveHistBtn" onclick="saveHist()">💾 이력 저장</button>
+          <button class="btn btn-ghost btn-sm" onclick="copyRes()">📋 복사</button>
+        </div>
+      </div>
+      <div id="conflictWarn" class="warn-box" style="display:none">⚠️ 최근 3개월 동일팀 조건을 완전히 만족하는 배치를 찾지 못해 최선의 배치로 편성했습니다.</div>
+      <p class="hint" style="margin-bottom:10px">✋ 카드를 드래그하여 팀원을 다른 팀으로 이동할 수 있습니다</p>
+      <div class="t-grid" id="tGrid"></div>
+      <div id="sumBar" style="display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:rgba(255,255,255,.4);margin-top:12px"></div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: HISTORY ═══ -->
+  <div id="tab-history" class="panel">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <span class="han" style="font-size:14px;color:var(--gold);letter-spacing:2px">편성 이력</span>
+        <button class="btn btn-danger btn-sm" onclick="clearHist()">전체 삭제</button>
+      </div>
+      <div id="histList"><div style="text-align:center;padding:28px;color:rgba(255,255,255,.22);font-size:13px">저장된 이력이 없습니다</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
