@@ -28,25 +28,25 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #app{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:24px 14px 100px}
 .han{font-family:'Black Han Sans',sans-serif}
 
-/* ── Header ── */
+/* Header */
 .hdr{text-align:center;margin-bottom:24px}
 .hdr .ico{font-size:42px;display:block;animation:sway 3s ease-in-out infinite}
 @keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
 .hdr h1{font-family:'Black Han Sans',sans-serif;font-size:clamp(22px,5vw,36px);letter-spacing:4px;color:var(--gold-l);text-shadow:0 2px 18px rgba(212,160,23,.4);margin:8px 0 4px}
 .hdr p{color:var(--g4);font-size:12px;letter-spacing:2px}
 
-/* ── Tabs ── */
+/* Tabs */
 .tabs{display:flex;gap:3px;background:rgba(0,0,0,.3);border-radius:12px;padding:4px;margin-bottom:18px;position:sticky;top:8px;z-index:50;backdrop-filter:blur(12px)}
 .tab{flex:1;padding:10px 4px;border:none;border-radius:9px;background:transparent;color:rgba(255,255,255,.4);font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s}
 .tab.on{background:var(--g2);color:var(--gold-l);font-weight:700}
 .panel{display:none}.panel.on{display:block}
 
-/* ── Cards ── */
+/* Cards */
 .card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-radius:var(--r);padding:20px;margin-bottom:14px;backdrop-filter:blur(8px)}
 .ctitle{font-family:'Black Han Sans',sans-serif;font-size:14px;letter-spacing:2px;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .ctitle::before{content:'';width:3px;height:15px;background:var(--gold);border-radius:2px;flex-shrink:0}
 
-/* ── Inputs ── */
+/* Inputs */
 input,select{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:9px;padding:10px 13px;color:var(--cream);font-family:'Noto Sans KR',sans-serif;font-size:14px;outline:none;transition:border-color .2s;width:100%;-webkit-appearance:none}
 input:focus,select:focus{border-color:var(--g3)}
 input::placeholder{color:rgba(255,255,255,.22)}
@@ -56,7 +56,7 @@ label.lbl{font-size:11px;color:var(--g4);margin-bottom:4px;display:block}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
 
-/* ── Buttons ── */
+/* Buttons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:9px 15px;border-radius:9px;border:none;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:500;transition:all .18s;white-space:nowrap}
 .btn-sm{padding:6px 11px;font-size:12px;border-radius:7px}
 .btn-block{width:100%;padding:15px;font-family:'Black Han Sans',sans-serif;font-size:18px;letter-spacing:3px}
@@ -67,14 +67,14 @@ label.lbl{font-size:11px;color:var(--g4);margin-bottom:4px;display:block}
 .btn-danger{background:rgba(224,92,58,.1);border:1px solid rgba(224,92,58,.28);color:#ff9f85}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 
-/* ── 등급 배지 ── */
+/* 등급 배지 */
 .pace{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-family:'Black Han Sans',sans-serif;font-size:11px;flex-shrink:0}
 .pace-A{background:rgba(224,92,58,.28);color:var(--pa);border:1px solid rgba(224,92,58,.55)}
 .pace-B{background:rgba(212,160,23,.22);color:var(--pb);border:1px solid rgba(212,160,23,.5)}
 .pace-C{background:rgba(82,183,136,.2);color:var(--pc);border:1px solid rgba(82,183,136,.45)}
 .pace-D{background:rgba(91,164,230,.2);color:var(--pd);border:1px solid rgba(91,164,230,.45)}
 
-/* ── 등급 선택 버튼 ── */
+/* 등급 선택 버튼 */
 .pace-select{display:flex;gap:6px}
 .pace-btn{flex:1;padding:10px 4px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);font-family:'Black Han Sans',sans-serif;font-size:16px;cursor:pointer;transition:all .18s;text-align:center}
 .pace-btn small{display:block;font-family:'Noto Sans KR',sans-serif;font-size:9px;margin-top:1px;letter-spacing:0;font-weight:400}
@@ -83,116 +83,77 @@ label.lbl{font-size:11px;color:var(--g4);margin-bottom:4px;display:block}
 .pace-btn.on-C{background:rgba(82,183,136,.16);border-color:var(--pc);color:var(--pc)}
 .pace-btn.on-D{background:rgba(91,164,230,.16);border-color:var(--pd);color:var(--pd)}
 
-/* ── 참가자 칩 ── */
+/* 칩 */
 .chips{display:flex;flex-wrap:wrap;gap:6px;min-height:36px}
 .chip{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);border-radius:50px;padding:5px 12px 5px 7px;font-size:13px;cursor:pointer;transition:all .17s;user-select:none;display:inline-flex;align-items:center;gap:5px}
 .chip:active{transform:scale(.95)}
 .chip.sel{background:rgba(82,183,136,.12);border-color:var(--g3)}
 
-/* ── 등급 분포 ── */
+/* 등급 분포 */
 .grade-dist{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
 .gd-item{display:inline-flex;align-items:center;gap:3px;font-size:11px}
 
-/* ── 배지 ── */
+/* 배지 */
 .badge{border-radius:50px;padding:3px 10px;font-size:11px;display:inline-flex;align-items:center;gap:3px}
 .badge-m{background:rgba(91,164,230,.12);border:1px solid rgba(91,164,230,.28);color:var(--blue)}
 .badge-f{background:rgba(232,121,160,.12);border:1px solid rgba(232,121,160,.28);color:var(--pink)}
 .cnt-pill{background:var(--g2);border-radius:50px;padding:4px 12px;font-size:13px;color:var(--g4)}
 .cnt-pill b{color:var(--gold-l);font-size:14px}
 
-/* ── 팀 결과 카드 ── */
-.t-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+/* 팀 카드 */
+.t-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
 @media(max-width:500px){.t-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:340px){.t-grid{grid-template-columns:1fr}}
-.tcard{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:13px;overflow:hidden;animation:up .38s ease both;transition:outline .15s}
+.tcard{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:13px;overflow:hidden;animation:up .38s ease both;transition:outline .15s,background .15s}
 .tcard.drag-over{outline:2px dashed var(--g3);background:rgba(82,183,136,.07)}
 @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 .thd{background:var(--g2);padding:10px 13px;display:flex;justify-content:space-between;align-items:center;gap:4px}
 .tnum{font-family:'Black Han Sans',sans-serif;font-size:14px;color:var(--gold-l);letter-spacing:2px;flex-shrink:0}
-.tbody{padding:11px 13px;display:flex;flex-direction:column;gap:6px}
-.mrow{display:flex;align-items:center;gap:6px;font-size:13px;padding:2px 3px;border-radius:5px}
+.tbody{padding:11px 13px;display:flex;flex-direction:column;gap:5px}
+/* 일반 모드 팀원 행 - 닉네임만 */
+.mrow{display:flex;align-items:center;gap:5px;font-size:13px;padding:2px 3px;border-radius:5px}
+.mname{font-weight:500}
 
-/* ── 수정 모드 스타일 ── */
+/* 수정 모드 */
 .edit-tbody{gap:8px}
-
-.edit-row{
-  display:flex;
-  flex-direction:column;
-  align-items:stretch;
-  gap:5px;
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:8px;
-  padding:7px 9px;
-  cursor:grab;
-}
+.edit-row{display:flex;flex-direction:column;align-items:stretch;gap:5px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:7px 9px;cursor:grab}
 .edit-row:active{cursor:grabbing}
-.mrow-info{display:flex;align-items:center;gap:6px;font-size:13px;flex-wrap:wrap}
-.mrow-actions{display:flex;align-items:center;gap:5px;margin-top:4px;flex-wrap:wrap}
-
-/* 이동 버튼 */
+.mrow-info{display:flex;align-items:center;gap:5px;font-size:13px}
+.mrow-actions{display:flex;align-items:center;gap:5px;margin-top:3px;flex-wrap:wrap}
 .move-btns{display:flex;gap:4px;flex-wrap:wrap;flex:1}
-.move-btn{
-  background:rgba(82,183,136,.14);
-  border:1px solid rgba(82,183,136,.35);
-  color:var(--g4);
-  border-radius:6px;
-  padding:3px 9px;
-  font-size:11px;
-  font-family:'Black Han Sans',sans-serif;
-  cursor:pointer;
-  transition:all .15s;
-  letter-spacing:1px;
-  white-space:nowrap;
-}
+.move-btn{background:rgba(82,183,136,.14);border:1px solid rgba(82,183,136,.35);color:var(--g4);border-radius:6px;padding:3px 9px;font-size:11px;font-family:'Black Han Sans',sans-serif;cursor:pointer;transition:all .15s;letter-spacing:1px}
 .move-btn:hover,.move-btn:active{background:var(--g3);color:var(--g0);border-color:var(--g3)}
-
-/* 제거 버튼 */
-.remove-btn{
-  background:rgba(224,92,58,.12);
-  border:1px solid rgba(224,92,58,.3);
-  color:#ff9f85;
-  border-radius:6px;
-  padding:3px 9px;
-  font-size:11px;
-  cursor:pointer;
-  transition:all .15s;
-  flex-shrink:0;
-}
+.remove-btn{background:rgba(224,92,58,.12);border:1px solid rgba(224,92,58,.3);color:#ff9f85;border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer;transition:all .15s;flex-shrink:0}
 .remove-btn:hover,.remove-btn:active{background:rgba(224,92,58,.3)}
 
-/* 수정 모드일 때 카드 테두리 강조 */
-.tcard:has(.edit-row){border-color:rgba(82,183,136,.3)}
-
-/* ── 이력 ── */
+/* 이력 */
 .hi{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);border-radius:12px;margin-bottom:10px;overflow:hidden}
 .hi-hdr{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer}
 .hi-date{font-family:'Black Han Sans',sans-serif;font-size:13px;color:var(--gold);letter-spacing:1px}
 .hi-meta{font-size:11px;color:rgba(255,255,255,.38);margin-top:2px}
 .hi-body{display:none;padding:0 14px 14px}
 .hi-body.open{display:block}
-.ht-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:9px;margin-top:10px}
+.ht-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:9px;margin-top:10px}
 @media(max-width:480px){.ht-grid{grid-template-columns:1fr 1fr}}
 
-/* ── Table ── */
+/* Table */
 .tbl{width:100%;border-collapse:collapse;font-size:12px}
 .tbl th{padding:7px 8px;text-align:left;color:var(--g4);font-weight:500;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap}
 .tbl td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle}
 .tbl tr:last-child td{border-bottom:none}
 .ovx{overflow-x:auto;-webkit-overflow-scrolling:touch}
 
-/* ── 알림 ── */
+/* 알림 */
 .err-box{background:rgba(224,92,58,.12);border:1px solid rgba(224,92,58,.3);border-radius:9px;padding:10px 13px;font-size:13px;color:#ff9f85;margin-bottom:10px}
 .warn-box{background:rgba(212,160,23,.09);border:1px solid rgba(212,160,23,.28);border-radius:9px;padding:9px 13px;font-size:12px;color:var(--gold-l);margin-bottom:10px}
 .hint{font-size:11px;color:rgba(255,255,255,.28);line-height:1.6}
 .divider{border:none;border-top:1px solid rgba(255,255,255,.07);margin:18px 0}
+.info-box{background:rgba(82,183,136,.08);border:1px solid rgba(82,183,136,.22);border-radius:9px;padding:10px 13px;font-size:12px;color:var(--g4);margin-bottom:12px;line-height:1.7}
 
 ::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px}
-
 .toast{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:rgba(45,106,79,.95);border:1px solid var(--g3);color:var(--cream);padding:10px 22px;border-radius:50px;font-size:13px;opacity:0;transition:all .3s;z-index:999;white-space:nowrap;backdrop-filter:blur(8px)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
 .install-bar{background:linear-gradient(135deg,var(--g2),#1e4a35);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .install-bar p{font-size:13px;color:var(--g4);line-height:1.5}
 </style>
@@ -217,34 +178,27 @@ label.lbl{font-size:11px;color:var(--g4);margin-bottom:4px;display:block}
     <button class="tab" onclick="switchTab('history')" role="tab">📋 이력</button>
   </div>
 
-  <!-- ═══════════════════════ TAB: MEMBERS ═══════════════════════ -->
+  <!-- ══════════════ TAB: MEMBERS ══════════════ -->
   <div id="tab-members" class="panel on">
 
     <div class="card" id="formCard">
       <div class="ctitle" id="formTitle">신규 회원 등록</div>
-
-      <!-- 등급 안내 -->
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;padding:10px 12px;background:rgba(255,255,255,.04);border-radius:9px;border:1px solid rgba(255,255,255,.07)">
         <span style="font-size:11px;color:rgba(255,255,255,.38);width:100%;margin-bottom:2px">플레이 속도 등급 기준</span>
         <span style="display:flex;align-items:center;gap:4px;font-size:12px;color:rgba(255,255,255,.6)"><span class="pace pace-A">A</span> 매우 빠름</span>
         <span style="display:flex;align-items:center;gap:4px;font-size:12px;color:rgba(255,255,255,.6)"><span class="pace pace-B">B</span> 보통 빠름</span>
-        <span style="display:flex;align-items:center;gap:4px;font-size:12px;color:rgba(255,255,255,.6)"><span class="pace pace-C">C</span> 보통 느림</span>
-        <span style="display:flex;align-items:center;gap:4px;font-size:12px;color:rgba(255,255,255,.6)"><span class="pace pace-D">D</span> 매우 느림 <span style="font-size:10px;color:rgba(255,255,255,.35)">(팀당 1명 제한)</span></span>
+        <span style="display:flex;align-items:center;gap:4px;font-size:12px;color:rgba(255,255,255,.6)"><span class="pace pace-C">C</span> 보통 느림 <span style="font-size:10px;color:rgba(255,255,255,.32)">(팀당 1명)</span></span>
+        <span style="display:flex;align-items:center;gap:4px;font-size:12px;color:rgba(255,255,255,.6)"><span class="pace pace-D">D</span> 매우 느림 <span style="font-size:10px;color:rgba(255,255,255,.32)">(팀당 1명)</span></span>
       </div>
-
       <div class="grid3">
         <div class="field"><label class="lbl">닉네임 *</label><input id="fNick" placeholder="독수리" maxlength="12"></div>
         <div class="field"><label class="lbl">실명 *</label><input id="fName" placeholder="김철수" maxlength="12"></div>
         <div class="field"><label class="lbl">전화 뒷자리 (선택)</label><input id="fPhone" placeholder="1234" maxlength="4" inputmode="numeric"></div>
       </div>
-
       <div class="grid2">
         <div class="field">
           <label class="lbl">성별</label>
-          <select id="fGender">
-            <option value="M">👨 남성</option>
-            <option value="F">👩 여성</option>
-          </select>
+          <select id="fGender"><option value="M">👨 남성</option><option value="F">👩 여성</option></select>
         </div>
         <div class="field">
           <label class="lbl">플레이 속도 등급 *</label>
@@ -256,7 +210,6 @@ label.lbl{font-size:11px;color:var(--g4);margin-bottom:4px;display:block}
           </div>
         </div>
       </div>
-
       <div class="btn-row">
         <button class="btn btn-ghost btn-sm" id="fCancelBtn" onclick="cancelEdit()" style="display:none">취소</button>
         <button class="btn btn-outline btn-sm" onclick="saveMember()" id="fSaveBtn">✚ 등록하기</button>
@@ -288,7 +241,7 @@ label.lbl{font-size:11px;color:var(--g4);margin-bottom:4px;display:block}
     </div>
   </div>
 
-  <!-- ═══════════════════════ TAB: DRAW ═══════════════════════ -->
+  <!-- ══════════════ TAB: DRAW ══════════════ -->
   <div id="tab-draw" class="panel">
 
     <div class="card">
@@ -307,7 +260,7 @@ label.lbl{font-size:11px;color:var(--g4);margin-bottom:4px;display:block}
           <span class="cnt-pill">선택 <b id="selCnt">0</b>명 · <b id="selTeams">0</b>팀</span>
         </div>
       </div>
-      <p class="hint" style="margin-bottom:10px">탭하여 이번 모임 참가자를 선택하세요. 배지는 플레이 속도 등급입니다.</p>
+      <p class="hint" style="margin-bottom:10px">탭하여 참가자를 선택하세요. 배지는 플레이 속도 등급입니다.</p>
       <div class="chips" id="pGrid"><span style="color:rgba(255,255,255,.2);font-size:13px">회원을 먼저 등록해 주세요</span></div>
       <div class="btn-row" style="margin-top:10px">
         <button class="btn btn-ghost btn-sm" onclick="selAll()">전체 선택</button>
@@ -316,32 +269,44 @@ label.lbl{font-size:11px;color:var(--g4);margin-bottom:4px;display:block}
     </div>
 
     <div id="drawErr" class="err-box" style="display:none"></div>
-
     <button class="btn btn-gold btn-block" onclick="draw()">🏌️ 조 편성 시작</button>
-    <p class="hint" style="text-align:center;margin-top:6px;margin-bottom:16px">A·B·C·D 등급 균형 배분 · D등급 팀당 1명 제한 · 남/여 균형 · 최근 3개월 동일팀 회피</p>
+    <p class="hint" style="text-align:center;margin-top:6px;margin-bottom:16px">
+      C·D 팀당 1명 · 성비 균형 · 최근 3개월 동일팀 회피 · 닉네임 가나다순 표시
+    </p>
 
-    <!-- ── 편성 결과 ── -->
+    <!-- 결과 -->
     <div id="resSection" style="display:none">
       <hr class="divider">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
         <h2 class="han" style="font-size:17px;color:var(--gold-l);letter-spacing:2px">⛳ 조 편성 결과</h2>
         <div class="btn-row">
           <button class="btn btn-outline btn-sm" onclick="draw()">🔀 다시 뽑기</button>
-          <!-- ★ 수정 모드 버튼 -->
           <button class="btn btn-ghost btn-sm" id="editModeBtn" onclick="toggleEditMode()">✏️ 결과 수정</button>
           <button class="btn btn-ghost btn-sm" id="saveHistBtn" onclick="saveHist()">💾 이력 저장</button>
-          <button class="btn btn-ghost btn-sm" onclick="copyRes()">📋 복사</button>
         </div>
+      </div>
+
+      <!-- 복사 버튼 2종 -->
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="copyRes('compact')" style="flex:1;min-width:120px">
+          📋 간결 복사 <span style="font-size:10px;opacity:.6">(실명+전화)</span>
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="copyRes('detail')" style="flex:1;min-width:120px">
+          📋 상세 복사 <span style="font-size:10px;opacity:.6">(등급+닉네임)</span>
+        </button>
+      </div>
+
+      <!-- 복사 양식 미리보기 -->
+      <div style="background:rgba(0,0,0,.18);border-radius:9px;padding:10px 13px;margin-bottom:14px;font-size:11px;color:rgba(255,255,255,.4);line-height:1.8">
+        <span style="color:rgba(255,255,255,.28)">간결 양식 예시:</span> 1조: 장은화*(2985), 윤용섭(4186), 채창길(0213)<br>
+        <span style="color:rgba(255,255,255,.28)">상세 양식 예시:</span> 【1조】 [B] 독수리 / 윤용섭(4186) · [C] 솔개* / 장은화*(2985)
       </div>
 
       <div id="conflictWarn" class="warn-box" style="display:none"></div>
 
-      <!-- 수정 모드 안내 배너 (수정 모드일 때만 표시) -->
-      <div id="editGuide" style="display:none;background:rgba(82,183,136,.08);border:1px solid rgba(82,183,136,.25);border-radius:9px;padding:10px 13px;font-size:12px;color:var(--g4);margin-bottom:12px;line-height:1.7">
+      <div id="editGuide" class="info-box" style="display:none">
         <b style="color:var(--g3)">✏️ 수정 모드</b><br>
-        · 팀원 카드의 <b>○조 버튼</b>을 탭하면 해당 조로 이동합니다<br>
-        · <b>✕ 버튼</b>을 탭하면 해당 팀원을 제거합니다<br>
-        · 카드를 다른 팀으로 <b>드래그</b>해도 이동됩니다
+        · <b>○조 버튼</b> 탭 → 해당 조로 이동 &nbsp;·&nbsp; <b>✕</b> 탭 → 제거 &nbsp;·&nbsp; <b>드래그</b>도 가능
       </div>
 
       <div class="t-grid" id="tGrid"></div>
@@ -349,33 +314,20 @@ label.lbl{font-size:11px;color:var(--g4);margin-bottom:4px;display:block}
     </div>
   </div>
 
-  <!-- ═══════════════════════ TAB: HISTORY ═══════════════════════ -->
+  <!-- ══════════════ TAB: HISTORY ══════════════ -->
   <div id="tab-history" class="panel">
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
         <span class="han" style="font-size:14px;color:var(--gold);letter-spacing:2px">편성 이력</span>
         <button class="btn btn-danger btn-sm" onclick="clearHist()">전체 삭제</button>
       </div>
+      <p class="hint" style="margin-bottom:12px">📋간결 = 실명+* (여성) + 전화번호 양식 &nbsp;·&nbsp; 📋상세 = 등급+닉네임+실명 양식</p>
       <div id="histList"><div style="text-align:center;padding:28px;color:rgba(255,255,255,.22);font-size:13px">저장된 이력이 없습니다</div></div>
     </div>
   </div>
 
 </div>
 <div class="toast" id="toast"></div>
-
-<script>
-// editModeBtn과 editGuide 연동 (app.js의 toggleEditMode가 호출 후 처리)
-const _origToggle = window.toggleEditMode;
-</script>
 <script src="app.js"></script>
-<script>
-// editGuide 배너 연동 패치
-const _realToggle = toggleEditMode;
-toggleEditMode = function() {
-  _realToggle();
-  const guide = document.getElementById('editGuide');
-  if (guide) guide.style.display = editMode ? '' : 'none';
-};
-</script>
 </body>
 </html>
