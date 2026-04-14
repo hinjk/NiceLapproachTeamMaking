@@ -1,35 +1,63 @@
-/* ─────────────────────────────────────────────────────────────
-   GOLF 조 편성기 - app.js
-   Features: 남여균형, 슬로우분리, 3개월동일팀회피, 드래그편집, PWA
-───────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   GOLF 조 편성기 - app.js  v3
+   플레이 속도 A/B/C/D 등급 균형 배분 + 남여균형 + 3개월동일팀회피
+═══════════════════════════════════════════════════════════════ */
 
-// ── State ────────────────────────────────────────────────────
+// ── 등급 정의 ─────────────────────────────────────────────────
+const PACES = ['A','B','C','D'];
+const PACE_LABEL = { A:'매우 빠름', B:'보통 빠름', C:'보통 느림', D:'매우 느림' };
+const PACE_COLOR = { A:'var(--pa)', B:'var(--pb)', C:'var(--pc)', D:'var(--pd)' };
+
+// ── State ─────────────────────────────────────────────────────
 let db = { members: [], history: [] };
 let editId = null;
-let selSet = new Set();
-let slowSet = new Set();
+let currentPace = null;   // 등록 폼에서 선택된 등급
+let selSet = new Set();   // 이번 모임 참가자 id set
 let lastTeams = null;
-let dragSrc = null; // {tIdx, mIdx}
+let dragSrc = null;
 
-// ── Storage ──────────────────────────────────────────────────
+// ── Storage ───────────────────────────────────────────────────
 function save() {
-  localStorage.setItem('golfapp_v2', JSON.stringify(db));
+  localStorage.setItem('golfapp_v3', JSON.stringify(db));
 }
 function load() {
   try {
-    const s = localStorage.getItem('golfapp_v2');
-    if (s) db = JSON.parse(s);
-    // migration: add gender to old members
-    db.members.forEach(m => { if (!m.gender) m.gender = 'M'; });
+    const s = localStorage.getItem('golfapp_v3');
+    if (s) {
+      db = JSON.parse(s);
+    } else {
+      // v2 마이그레이션: isSlow → pace (슬로우였으면 D, 아니면 B)
+      const old = localStorage.getItem('golfapp_v2');
+      if (old) {
+        const oldDb = JSON.parse(old);
+        db.members = (oldDb.members || []).map(m => ({
+          ...m,
+          pace: m.pace || (m.isSlow ? 'D' : 'B'),
+          gender: m.gender || 'M'
+        }));
+        db.history = (oldDb.history || []).map(h => ({
+          ...h,
+          teams: h.teams.map(team => team.map(m => ({
+            ...m,
+            pace: m.pace || (m.isSlow ? 'D' : 'B')
+          })))
+        }));
+      }
+    }
+    // 방어: pace 없는 경우
+    db.members.forEach(m => {
+      if (!m.pace) m.pace = 'B';
+      if (!m.gender) m.gender = 'M';
+    });
   } catch (e) { db = { members: [], history: [] }; }
 }
 
-// ── Helpers ──────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function today() { return new Date().toISOString().slice(0, 10); }
 function $(id) { return document.getElementById(id); }
 function esc(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function toast(msg) {
   const t = $('toast'); t.textContent = msg; t.classList.add('show');
@@ -37,14 +65,28 @@ function toast(msg) {
 }
 function shuffle(arr) {
   const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i],a[j]] = [a[j],a[i]];
   }
   return a;
 }
 
-// ── Tabs ─────────────────────────────────────────────────────
+// 등급 배지 HTML
+function paceBadge(p) {
+  return `<span class="pace pace-${p}" style="font-family:'Black Han Sans',sans-serif">${p}</span>`;
+}
+
+// 등급 분포 HTML (grade-dist 영역용)
+function gradeDist(members) {
+  return PACES.map(p => {
+    const cnt = members.filter(m => m.pace === p).length;
+    if (cnt === 0) return '';
+    return `<span class="gd-item">${paceBadge(p)}<span style="color:${PACE_COLOR[p]}">${cnt}</span></span>`;
+  }).join('');
+}
+
+// ── Tabs ──────────────────────────────────────────────────────
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t, i) => {
     t.classList.toggle('on', ['members','draw','history'][i] === name);
@@ -55,24 +97,33 @@ function switchTab(name) {
   if (name === 'history') renderHistory();
 }
 
-// ── Members ──────────────────────────────────────────────────
+// ── 등급 선택 버튼 ────────────────────────────────────────────
+function setPace(p) {
+  currentPace = p;
+  document.querySelectorAll('.pace-btn').forEach(btn => {
+    btn.className = 'pace-btn';
+    if (btn.dataset.pace === p) btn.classList.add(`on-${p}`);
+  });
+}
+
+// ── Members ───────────────────────────────────────────────────
 function saveMember() {
-  const nick = $('fNick').value.trim();
-  const name = $('fName').value.trim();
+  const nick  = $('fNick').value.trim();
+  const name  = $('fName').value.trim();
   const phone = $('fPhone').value.trim();
   const gender = $('fGender').value;
-  const isSlow = $('fSlow').classList.contains('on');
 
   if (!nick || !name) { toast('❌ 닉네임과 실명은 필수입니다'); return; }
+  if (!currentPace)   { toast('❌ 플레이 속도 등급을 선택해 주세요'); return; }
   if (phone && !/^\d{4}$/.test(phone)) { toast('❌ 전화번호는 숫자 4자리'); return; }
 
   if (editId) {
     const m = db.members.find(m => m.id === editId);
-    if (m) Object.assign(m, { nick, name, phone, gender, isSlow });
+    if (m) Object.assign(m, { nick, name, phone, gender, pace: currentPace });
     editId = null;
   } else {
     if (db.members.some(m => m.nick === nick)) { toast('❌ 동일 닉네임 존재'); return; }
-    db.members.push({ id: uid(), nick, name, phone, gender, isSlow });
+    db.members.push({ id: uid(), nick, name, phone, gender, pace: currentPace });
   }
   save();
   resetForm();
@@ -83,25 +134,25 @@ function saveMember() {
 function resetForm() {
   ['fNick','fName','fPhone'].forEach(id => $(id).value = '');
   $('fGender').value = 'M';
-  $('fSlow').classList.remove('on');
+  document.querySelectorAll('.pace-btn').forEach(btn => btn.className = 'pace-btn');
+  currentPace = null;
   $('formTitle').textContent = '신규 회원 등록';
-  $('fSaveBtn').textContent = '✚ 등록하기';
+  $('fSaveBtn').textContent  = '✚ 등록하기';
   $('fCancelBtn').style.display = 'none';
   editId = null;
 }
-
 function cancelEdit() { resetForm(); }
 
 function editMember(id) {
   const m = db.members.find(m => m.id === id); if (!m) return;
   editId = id;
-  $('fNick').value = m.nick;
-  $('fName').value = m.name;
-  $('fPhone').value = m.phone || '';
+  $('fNick').value   = m.nick;
+  $('fName').value   = m.name;
+  $('fPhone').value  = m.phone || '';
   $('fGender').value = m.gender || 'M';
-  $('fSlow').classList.toggle('on', !!m.isSlow);
+  setPace(m.pace || 'B');
   $('formTitle').textContent = '회원 정보 수정';
-  $('fSaveBtn').textContent = '✔ 저장하기';
+  $('fSaveBtn').textContent  = '✔ 저장하기';
   $('fCancelBtn').style.display = '';
   $('formCard').scrollIntoView({ behavior: 'smooth' });
 }
@@ -110,7 +161,7 @@ function deleteMember(id) {
   const m = db.members.find(m => m.id === id);
   if (!confirm(`'${m.nick}' 회원을 삭제할까요?`)) return;
   db.members = db.members.filter(m => m.id !== id);
-  selSet.delete(id); slowSet.delete(id);
+  selSet.delete(id);
   save(); renderMembers(); toast('삭제되었습니다');
 }
 
@@ -119,10 +170,8 @@ function renderMembers() {
   const list = db.members.filter(m =>
     m.nick.toLowerCase().includes(q) || m.name.toLowerCase().includes(q)
   );
-  const mc = db.members.filter(m => m.gender === 'M').length;
-  const fc = db.members.filter(m => m.gender === 'F').length;
   $('mTotal').textContent = `(${db.members.length}명)`;
-  $('mGender').innerHTML = `<span style="color:#5ba4e6;font-size:12px">👨${mc}</span> <span style="color:#e879a0;font-size:12px">👩${fc}</span>`;
+  $('mGradeBar').innerHTML = gradeDist(db.members);
 
   if (db.members.length === 0) {
     $('mBody').innerHTML = ''; $('mEmpty').style.display = ''; return;
@@ -132,11 +181,12 @@ function renderMembers() {
     <tr>
       <td><b style="color:var(--gold-l)">${esc(m.nick)}</b></td>
       <td>${esc(m.name)}</td>
-      <td><span class="badge badge-${m.gender === 'F' ? 'f' : 'm'}">${m.gender === 'F' ? '👩 여' : '👨 남'}</span></td>
-      <td style="color:rgba(255,255,255,.38)">${m.phone ? '****-' + esc(m.phone) : '—'}</td>
-      <td>${m.isSlow
-        ? '<span class="badge badge-slow">🐢 슬로우</span>'
-        : '<span class="badge badge-norm">일반</span>'}</td>
+      <td><span class="badge badge-${m.gender==='F'?'f':'m'}">${m.gender==='F'?'👩 여':'👨 남'}</span></td>
+      <td style="color:rgba(255,255,255,.38)">${m.phone ? '****-'+esc(m.phone) : '—'}</td>
+      <td>
+        ${paceBadge(m.pace)}
+        <span style="font-size:11px;color:${PACE_COLOR[m.pace]};margin-left:4px">${PACE_LABEL[m.pace]||''}</span>
+      </td>
       <td style="text-align:right;white-space:nowrap">
         <button class="btn btn-ghost btn-sm" onclick="editMember('${m.id}')" style="margin-right:3px">수정</button>
         <button class="btn btn-danger btn-sm" onclick="deleteMember('${m.id}')">삭제</button>
@@ -145,7 +195,7 @@ function renderMembers() {
 }
 
 function exportJSON() {
-  const b = new Blob([JSON.stringify(db.members, null, 2)], { type: 'application/json' });
+  const b = new Blob([JSON.stringify(db.members, null, 2)], { type:'application/json' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(b);
   a.download = 'golf-members.json'; a.click();
 }
@@ -156,7 +206,11 @@ function importJSON(e) {
     try {
       const arr = JSON.parse(ev.target.result);
       if (!Array.isArray(arr)) throw new Error();
-      db.members = arr.map(m => ({ ...m, gender: m.gender || 'M' }));
+      db.members = arr.map(m => ({
+        ...m,
+        pace:   m.pace   || (m.isSlow ? 'D' : 'B'),
+        gender: m.gender || 'M'
+      }));
       save(); renderMembers();
       toast(`✅ ${arr.length}명 가져오기 완료`);
     } catch { toast('❌ 파일 형식 오류'); }
@@ -164,77 +218,49 @@ function importJSON(e) {
   r.readAsText(file); e.target.value = '';
 }
 
-// ── Draw ─────────────────────────────────────────────────────
+// ── Draw: 참가자 선택 ─────────────────────────────────────────
 function renderPGrid() {
   const g = $('pGrid');
   if (db.members.length === 0) {
     g.innerHTML = '<span style="color:rgba(255,255,255,.2);font-size:13px">회원을 먼저 등록해 주세요</span>';
     updateSelCnt(); return;
   }
-  g.innerHTML = db.members.map(m => {
-    const sel = selSet.has(m.id);
-    const slowBorder = m.isSlow ? 'slow-border' : '';
-    const gc = m.gender === 'F' ? 'var(--pink)' : 'var(--blue)';
-    return `<div class="chip ${sel ? 'sel' : ''} ${slowBorder}" onclick="togSel('${m.id}')">
-      <span style="font-size:10px;color:${gc}">${m.gender === 'F' ? '👩' : '👨'}</span>
-      ${m.isSlow ? '🐢 ' : ''}${esc(m.nick)}
-    </div>`;
-  }).join('');
-  renderSlowRow();
+  const gc = m => m.gender === 'F' ? 'var(--pink)' : 'var(--blue)';
+  g.innerHTML = db.members.map(m =>
+    `<div class="chip ${selSet.has(m.id)?'sel':''}" onclick="togSel('${m.id}')">
+      ${paceBadge(m.pace)}
+      <span style="font-size:10px;color:${gc(m)}">${m.gender==='F'?'👩':'👨'}</span>
+      ${esc(m.nick)}
+    </div>`
+  ).join('');
   updateSelCnt();
 }
 
 function togSel(id) {
-  if (selSet.has(id)) { selSet.delete(id); slowSet.delete(id); }
-  else {
-    selSet.add(id);
-    const m = db.members.find(m => m.id === id);
-    if (m && m.isSlow) slowSet.add(id);
-  }
+  selSet.has(id) ? selSet.delete(id) : selSet.add(id);
   renderPGrid();
 }
-
-function selAll() {
-  db.members.forEach(m => { selSet.add(m.id); if (m.isSlow) slowSet.add(m.id); });
-  renderPGrid();
-}
-function selNone() { selSet.clear(); slowSet.clear(); renderPGrid(); }
+function selAll()  { db.members.forEach(m => selSet.add(m.id)); renderPGrid(); }
+function selNone() { selSet.clear(); renderPGrid(); }
 
 function updateSelCnt() {
   const n = selSet.size;
-  $('selCnt').textContent = n;
-  $('selTeams').textContent = n > 0 ? Math.ceil(n / 4) : 0;
+  $('selCnt').textContent   = n;
+  $('selTeams').textContent = n > 0 ? Math.ceil(n/4) : 0;
   const sel = db.members.filter(m => selSet.has(m.id));
-  const mc = sel.filter(m => m.gender === 'M').length;
-  const fc = sel.filter(m => m.gender === 'F').length;
-  $('selGender').innerHTML = n > 0
-    ? `<span style="color:var(--blue);font-size:12px">👨${mc}</span> <span style="color:var(--pink);font-size:12px">👩${fc}</span>`
-    : '';
+  $('selGradeBar').innerHTML = n > 0 ? gradeDist(sel) : '';
 }
 
-function renderSlowRow() {
-  const sel = db.members.filter(m => selSet.has(m.id));
-  const card = $('slowCard');
-  if (sel.length === 0) { card.style.display = 'none'; return; }
-  card.style.display = '';
-  $('slowRow').innerHTML = sel.map(m => {
-    const on = slowSet.has(m.id) ? 'slow-on' : '';
-    return `<div class="chip ${on}" onclick="togSlow('${m.id}')">${esc(m.nick)}</div>`;
-  }).join('');
-  $('slowMsg').textContent = slowSet.size > 0 ? `슬로우 플레이어 ${slowSet.size}명 지정됨` : '';
-}
-
-function togSlow(id) {
-  slowSet.has(id) ? slowSet.delete(id) : slowSet.add(id);
-  renderSlowRow();
-}
-
-function showDrawErr(msg) {
-  const e = $('drawErr'); e.textContent = msg; e.style.display = '';
-  setTimeout(() => e.style.display = 'none', 5000);
-}
-
-// ── Algorithm ────────────────────────────────────────────────
+// ── 알고리즘: 등급 균형 배분 ──────────────────────────────────
+/*
+  전략:
+  1) 참가자를 등급별로 그룹화 (A, B, C, D)
+  2) 라운드 로빈 방식으로 각 팀에 순서대로 배분
+     - 등급 순서를 랜덤 섞어서 매번 다른 결과
+  3) 4명 미만 팀은 남은 인원으로 채움
+  4) 남/여 균형 최대화: 각 등급 내에서 남/여 교차 배치
+  5) 3개월 동일팀 회피 (가능한 경우)
+*/
 function recentTeammates(memberId) {
   const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth() - 3);
   const result = new Set();
@@ -248,43 +274,53 @@ function recentTeammates(memberId) {
   return result;
 }
 
-function tryAssign(participants, sArr, nTeams, strict) {
-  const slowP = shuffle(participants.filter(m => sArr.includes(m.id)));
-  const males  = shuffle(participants.filter(m => !sArr.includes(m.id) && m.gender === 'M'));
-  const females = shuffle(participants.filter(m => !sArr.includes(m.id) && m.gender === 'F'));
+function interleaveMF(arr) {
+  // 같은 등급 내에서 남/여 교차 배열
+  const males   = arr.filter(m => m.gender === 'M');
+  const females = arr.filter(m => m.gender === 'F');
+  const result = [];
+  const max = Math.max(males.length, females.length);
+  for (let i = 0; i < max; i++) {
+    if (i < males.length)   result.push(males[i]);
+    if (i < females.length) result.push(females[i]);
+  }
+  return result;
+}
+
+function tryAssign(participants, nTeams, strict) {
+  // 등급별 분류 + 각 등급 내 남/여 교차 + 셔플
+  const byGrade = {};
+  PACES.forEach(p => {
+    byGrade[p] = interleaveMF(shuffle(participants.filter(m => m.pace === p)));
+  });
 
   const teams = Array.from({ length: nTeams }, () => []);
 
-  // 1) 슬로우 각 팀 1명
-  for (let i = 0; i < slowP.length; i++) teams[i].push(slowP[i]);
-
-  // 2) 남녀 교차 배분
-  const remain = [];
-  const max = Math.max(males.length, females.length);
-  for (let i = 0; i < max; i++) {
-    if (i < males.length) remain.push(males[i]);
-    if (i < females.length) remain.push(females[i]);
+  // 라운드 로빈: A→B→C→D 순으로 각 팀에 1명씩 배분
+  // 등급 순서도 약간 랜덤성 부여 (A/D 고정, B/C 순서만 랜덤)
+  const gradeOrder = Math.random() > 0.5 ? ['A','B','C','D'] : ['A','C','B','D'];
+  const pool = [];
+  const maxGLen = Math.max(...PACES.map(p => byGrade[p].length));
+  for (let i = 0; i < maxGLen; i++) {
+    for (const p of gradeOrder) {
+      if (i < byGrade[p].length) pool.push(byGrade[p][i]);
+    }
   }
 
-  let ni = 0;
-  for (let t = 0; t < nTeams; t++) {
-    const slots = 4 - teams[t].length;
-    for (let s = 0; s < slots && ni < remain.length; s++) teams[t].push(remain[ni++]);
-  }
-  while (ni < remain.length) teams[nTeams - 1].push(remain[ni++]);
+  // 팀에 순서대로 배분
+  pool.forEach((m, idx) => {
+    teams[idx % nTeams].push(m);
+  });
 
-  // 3) 슬로우 중복 검증
-  for (const team of teams)
-    if (team.filter(m => sArr.includes(m.id)).length > 1) return null;
-
-  // 4) 3개월 동일팀 검증 (strict 모드만)
+  // 3개월 동일팀 검증
   if (strict) {
     for (const team of teams) {
       const ids = team.map(m => m.id);
       for (let i = 0; i < ids.length; i++) {
         const prev = recentTeammates(ids[i]);
-        for (let j = i + 1; j < ids.length; j++)
+        for (let j = i+1; j < ids.length; j++) {
           if (prev.has(ids[j])) return null;
+        }
       }
     }
   }
@@ -294,31 +330,44 @@ function tryAssign(participants, sArr, nTeams, strict) {
 function draw() {
   $('drawErr').style.display = 'none';
   const participants = db.members.filter(m => selSet.has(m.id));
-  if (participants.length < 4) { showDrawErr('참가자가 최소 4명 이상이어야 합니다.'); return; }
+  if (participants.length < 4) { showErr('참가자가 최소 4명 이상이어야 합니다.'); return; }
 
-  const sArr = [...slowSet];
   const nTeams = Math.ceil(participants.length / 4);
-  if (sArr.length > nTeams) { showDrawErr(`슬로우 플레이어(${sArr.length}명)가 팀 수(${nTeams})보다 많습니다.`); return; }
-
   let teams = null;
   let relaxed = false;
 
-  // strict: 3개월 조건 포함 (최대 2000회)
-  for (let i = 0; i < 2000 && !teams; i++) teams = tryAssign(participants, sArr, nTeams, true);
+  // 엄격 모드 (3개월 조건 포함) 최대 2000회
+  for (let i = 0; i < 2000 && !teams; i++) teams = tryAssign(participants, nTeams, true);
 
-  // relaxed: 3개월 조건 제외 (최대 500회)
+  // 완화 모드 (3개월 조건 제외) 최대 500회
   if (!teams) {
     relaxed = true;
-    for (let i = 0; i < 500 && !teams; i++) teams = tryAssign(participants, sArr, nTeams, false);
+    for (let i = 0; i < 500 && !teams; i++) teams = tryAssign(participants, nTeams, false);
   }
 
-  if (!teams) { showDrawErr('조 편성 실패. 슬로우 플레이어를 줄이거나 참가자를 늘려주세요.'); return; }
+  if (!teams) { showErr('조 편성 실패. 참가자를 늘려주세요.'); return; }
 
   $('conflictWarn').style.display = relaxed ? '' : 'none';
   lastTeams = teams;
   $('saveHistBtn').textContent = '💾 이력 저장';
   renderResult(teams);
   launchConfetti();
+}
+
+function showErr(msg) {
+  const e = $('drawErr'); e.textContent = msg; e.style.display = '';
+  setTimeout(() => e.style.display = 'none', 6000);
+}
+
+// ── 결과 렌더링 ───────────────────────────────────────────────
+function teamGradeDist(team) {
+  return PACES.map(p => {
+    const cnt = team.filter(m => m.pace === p).length;
+    if (cnt === 0) return '';
+    return `<span style="font-family:'Black Han Sans',sans-serif;font-size:10px;padding:1px 5px;border-radius:4px;
+      background:${p==='A'?'rgba(224,92,58,.22)':p==='B'?'rgba(212,160,23,.18)':p==='C'?'rgba(82,183,136,.16)':'rgba(91,164,230,.16)'};
+      color:${PACE_COLOR[p]}">${p}:${cnt}</span>`;
+  }).join('');
 }
 
 function renderResult(teams) {
@@ -328,67 +377,64 @@ function renderResult(teams) {
   teams.forEach((team, tIdx) => {
     const mc = team.filter(m => m.gender === 'M').length;
     const fc = team.filter(m => m.gender !== 'M').length;
+
     const div = document.createElement('div');
     div.className = 'tcard';
     div.style.animationDelay = tIdx * 0.06 + 's';
     div.dataset.tidx = tIdx;
 
-    // Drag-over events
-    div.addEventListener('dragover', e => { e.preventDefault(); div.classList.add('drag-over'); });
+    div.addEventListener('dragover',  e => { e.preventDefault(); div.classList.add('drag-over'); });
     div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
-    div.addEventListener('drop', e => { e.preventDefault(); div.classList.remove('drag-over'); handleDrop(tIdx); });
-    // Touch drop zone
-    div.addEventListener('touchend', () => { if (dragSrc !== null) handleDrop(tIdx); });
+    div.addEventListener('drop',      e => { e.preventDefault(); div.classList.remove('drag-over'); handleDrop(tIdx); });
+    div.addEventListener('touchend',  () => { if (dragSrc !== null) handleDrop(tIdx); });
 
     div.innerHTML = `
       <div class="thd">
-        <span class="tnum">${tIdx + 1}조</span>
-        <div style="display:flex;gap:6px;font-size:11px">
-          <span style="color:var(--blue)">👨${mc}</span>
-          <span style="color:var(--pink)">👩${fc}</span>
-          <span style="color:rgba(255,255,255,.35)">${team.length}명</span>
+        <span class="tnum">${tIdx+1}조</span>
+        <div style="display:flex;gap:3px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+          ${teamGradeDist(team)}
+          <span style="font-size:10px;color:var(--blue);margin-left:2px">👨${mc}</span>
+          <span style="font-size:10px;color:var(--pink)">👩${fc}</span>
         </div>
       </div>
       <div class="tbody">
         ${team.map((m, mIdx) => {
-          const isSlow = slowSet.has(m.id);
           const gc = m.gender === 'F' ? 'var(--pink)' : 'var(--blue)';
-          return `<div class="mrow ${isSlow ? 'slow' : ''}" draggable="true"
-            data-tidx="${tIdx}" data-midx="${mIdx}"
-            ondragstart="handleDragStart(${tIdx},${mIdx})"
-            ontouchstart="handleDragStart(${tIdx},${mIdx})">
-            <span style="font-size:10px;color:${gc}">${m.gender === 'F' ? '👩' : '👨'}</span>
-            <div class="mdot"></div>
+          return `<div class="mrow" draggable="true"
+              data-tidx="${tIdx}" data-midx="${mIdx}"
+              ondragstart="handleDragStart(${tIdx},${mIdx})"
+              ontouchstart="handleDragStart(${tIdx},${mIdx})">
+            ${paceBadge(m.pace)}
+            <span style="font-size:10px;color:${gc}">${m.gender==='F'?'👩':'👨'}</span>
             <span class="mname">${esc(m.nick)}</span>
             <span style="font-size:11px;color:rgba(255,255,255,.27)">${esc(m.name)}</span>
             ${m.phone ? `<span style="font-size:10px;color:rgba(255,255,255,.25)">(${esc(m.phone)})</span>` : ''}
-            ${isSlow ? '<span style="font-size:10px">🐢</span>' : ''}
           </div>`;
         }).join('')}
       </div>`;
     g.appendChild(div);
   });
 
-  const total = teams.reduce((s, t) => s + t.length, 0);
-  const mc = db.members.filter(m => selSet.has(m.id) && m.gender === 'M').length;
-  const fc = db.members.filter(m => selSet.has(m.id) && m.gender !== 'M').length;
+  // 요약 바
+  const sel = db.members.filter(m => selSet.has(m.id));
+  const mc = sel.filter(m => m.gender === 'M').length;
+  const fc = sel.filter(m => m.gender !== 'M').length;
   $('sumBar').innerHTML = `
-    <span>총 <b style="color:var(--g4)">${total}명</b></span>
+    <span>총 <b style="color:var(--g4)">${sel.length}명</b></span>
     <span><b style="color:var(--g4)">${teams.length}팀</b> 편성</span>
-    <span>👨<b style="color:var(--blue)">${mc}</b> · 👩<b style="color:var(--pink)">${fc}</b></span>
-    ${slowSet.size > 0 ? `<span>슬로우 <b style="color:var(--g4)">${slowSet.size}명</b> 분리</span>` : ''}`;
+    <span>👨<b style="color:var(--blue)">${mc}</b> 👩<b style="color:var(--pink)">${fc}</b></span>
+    ${gradeDist(sel)}`;
 
-  setTimeout(() => $('resSection').scrollIntoView({ behavior: 'smooth' }), 80);
+  setTimeout(() => $('resSection').scrollIntoView({ behavior:'smooth' }), 80);
 }
 
-// ── Drag & Drop ──────────────────────────────────────────────
+// ── Drag & Drop ───────────────────────────────────────────────
 function handleDragStart(tIdx, mIdx) { dragSrc = { tIdx, mIdx }; }
 function handleDrop(toTIdx) {
   if (dragSrc === null) return;
   const { tIdx: fromT, mIdx: fromM } = dragSrc;
   dragSrc = null;
   if (fromT === toTIdx) return;
-
   const next = lastTeams.map(t => [...t]);
   const [member] = next[fromT].splice(fromM, 1);
   next[toTIdx].push(member);
@@ -397,17 +443,17 @@ function handleDrop(toTIdx) {
   $('saveHistBtn').textContent = '💾 이력 저장';
 }
 
-// ── History ──────────────────────────────────────────────────
+// ── History ───────────────────────────────────────────────────
 function saveHist() {
   if (!lastTeams) return;
-  const date = $('drawDate').value || today();
-  const note = $('drawNote').value.trim();
   const entry = {
-    id: uid(), date, note, slowCount: slowSet.size,
+    id: uid(),
+    date: $('drawDate').value || today(),
+    note: $('drawNote').value.trim(),
     teams: lastTeams.map(team => team.map(m => ({
       id: m.id, nick: m.nick, name: m.name,
       phone: m.phone || '', gender: m.gender || 'M',
-      isSlow: slowSet.has(m.id)
+      pace: m.pace || 'B'
     })))
   };
   db.history.unshift(entry);
@@ -423,10 +469,10 @@ function copyRes() {
   if ($('drawNote').value.trim()) t += `📍 ${$('drawNote').value.trim()}\n`;
   t += '\n';
   lastTeams.forEach((team, i) => {
-    t += `【${i + 1}조】\n`;
+    t += `【${i+1}조】\n`;
     team.forEach(m => {
       const ph = m.phone ? ` (${m.phone})` : '';
-      t += `  ${slowSet.has(m.id) ? '🐢 ' : ''}${m.nick} / ${m.name}${ph}\n`;
+      t += `  [${m.pace}] ${m.nick} / ${m.name}${ph}\n`;
     });
     t += '\n';
   });
@@ -440,13 +486,14 @@ function renderHistory() {
     return;
   }
   list.innerHTML = db.history.map(h => {
-    const total = h.teams.reduce((s, t) => s + t.length, 0);
+    const total = h.teams.reduce((s,t) => s+t.length, 0);
+    const allM  = h.teams.flat();
     return `
     <div class="hi" id="hi-${h.id}">
       <div class="hi-hdr" onclick="togHist('${h.id}')">
         <div>
           <div class="hi-date">${esc(h.date)}</div>
-          <div class="hi-meta">${h.teams.length}팀 · ${total}명${h.note ? ' · ' + esc(h.note) : ''}</div>
+          <div class="hi-meta">${h.teams.length}팀 · ${total}명${h.note?' · '+esc(h.note):''}</div>
         </div>
         <div style="display:flex;align-items:center;gap:7px">
           <button class="btn btn-ghost btn-sm" onclick="copyHist('${h.id}',event)">📋</button>
@@ -456,21 +503,20 @@ function renderHistory() {
       </div>
       <div class="hi-body" id="hb-${h.id}">
         <div class="ht-grid">
-          ${h.teams.map((team, i) => `
+          ${h.teams.map((team,i) => `
             <div class="tcard">
               <div class="thd">
-                <span class="tnum">${i + 1}조</span>
-                <span style="font-size:11px;color:rgba(255,255,255,.35)">${team.length}명</span>
+                <span class="tnum">${i+1}조</span>
+                <div style="display:flex;gap:3px;flex-wrap:wrap">${teamGradeDist(team)}</div>
               </div>
               <div class="tbody">
                 ${team.map(m => `
-                  <div class="mrow ${m.isSlow ? 'slow' : ''}">
-                    <span style="font-size:9px;color:${m.gender === 'F' ? 'var(--pink)' : 'var(--blue)'}">${m.gender === 'F' ? '👩' : '👨'}</span>
-                    <div class="mdot"></div>
+                  <div class="mrow" style="cursor:default">
+                    ${paceBadge(m.pace||'B')}
+                    <span style="font-size:9px;color:${m.gender==='F'?'var(--pink)':'var(--blue)'}">${m.gender==='F'?'👩':'👨'}</span>
                     <span class="mname" style="font-size:12px">${esc(m.nick)}</span>
                     <span style="font-size:10px;color:rgba(255,255,255,.27)">${esc(m.name)}</span>
-                    ${m.phone ? `<span style="font-size:10px;color:rgba(255,255,255,.22)">(${esc(m.phone)})</span>` : ''}
-                    ${m.isSlow ? '<span style="font-size:9px">🐢</span>' : ''}
+                    ${m.phone?`<span style="font-size:10px;color:rgba(255,255,255,.22)">(${esc(m.phone)})</span>`:''}
                   </div>`).join('')}
               </div>
             </div>`).join('')}
@@ -481,24 +527,21 @@ function renderHistory() {
 }
 
 function togHist(id) {
-  const b = $('hb-' + id); const a = $('arr-' + id);
+  const b = $('hb-'+id); const a = $('arr-'+id);
   const open = b.classList.toggle('open');
   a.style.transform = open ? 'rotate(180deg)' : '';
 }
-
 function delHist(id, e) {
   e.stopPropagation();
   if (!confirm('이 이력을 삭제할까요?')) return;
   db.history = db.history.filter(h => h.id !== id);
   save(); renderHistory(); toast('삭제되었습니다');
 }
-
 function clearHist() {
   if (!db.history.length) return;
   if (!confirm(`전체 ${db.history.length}개의 이력을 삭제할까요?`)) return;
   db.history = []; save(); renderHistory(); toast('전체 이력 삭제됨');
 }
-
 function copyHist(id, e) {
   e.stopPropagation();
   const h = db.history.find(h => h.id === id); if (!h) return;
@@ -506,20 +549,20 @@ function copyHist(id, e) {
   if (h.note) t += `📍 ${h.note}\n`;
   t += '\n';
   h.teams.forEach((team, i) => {
-    t += `【${i + 1}조】\n`;
+    t += `【${i+1}조】\n`;
     team.forEach(m => {
       const ph = m.phone ? ` (${m.phone})` : '';
-      t += `  ${m.isSlow ? '🐢 ' : ''}${m.nick} / ${m.name}${ph}\n`;
+      t += `  [${m.pace||'B'}] ${m.nick} / ${m.name}${ph}\n`;
     });
     t += '\n';
   });
   navigator.clipboard.writeText(t).then(() => toast('📋 복사됨'));
 }
 
-// ── Confetti ─────────────────────────────────────────────────
+// ── Confetti ──────────────────────────────────────────────────
 function launchConfetti() {
-  const cols = ['#d4a017','#52b788','#f0c040','#95d5b2','#ff9f85'];
-  for (let i = 0; i < 40; i++) {
+  const cols = ['#d4a017','#52b788','#f0c040','#95d5b2','#e05c3a','#5ba4e6'];
+  for (let i = 0; i < 42; i++) {
     const d = document.createElement('div');
     d.style.cssText = `position:fixed;width:${Math.random()*8+3}px;height:${Math.random()*8+3}px;
       background:${cols[i%cols.length]};border-radius:${Math.random()>.5?'50%':'2px'};
@@ -531,37 +574,31 @@ function launchConfetti() {
   }
 }
 
-// ── PWA Install ──────────────────────────────────────────────
+// ── PWA ───────────────────────────────────────────────────────
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault(); deferredPrompt = e;
   const bar = $('installBar');
   bar.style.display = 'flex';
   bar.querySelector('p').innerHTML = '📲 앱으로 설치하면 더 편리하게 사용할 수 있어요<br><b style="color:var(--gold-l)">지금 설치하기</b>';
-  bar.querySelector('button').textContent = '설치';
-  bar.querySelector('button').onclick = async () => {
+  const btn = bar.querySelector('button');
+  btn.textContent = '설치';
+  btn.onclick = async () => {
     deferredPrompt.prompt();
     await deferredPrompt.userChoice;
     deferredPrompt = null;
     bar.style.display = 'none';
   };
 });
-
-// iOS Safari install hint
 function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent); }
 function isStandalone() { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; }
-if (isIOS() && !isStandalone()) {
-  $('installBar').style.display = 'flex';
-}
+if (isIOS() && !isStandalone()) $('installBar').style.display = 'flex';
 
-// ── Service Worker ────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
-  });
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
 }
 
-// ── Init ─────────────────────────────────────────────────────
+// ── Init ──────────────────────────────────────────────────────
 load();
 $('drawDate').value = today();
 renderMembers();
