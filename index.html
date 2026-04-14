@@ -289,17 +289,17 @@ label.lbl{font-size:11px;color:var(--g4);margin-bottom:4px;display:block}
       <!-- 복사 버튼 2종 -->
       <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
         <button class="btn btn-ghost btn-sm" onclick="copyRes('compact')" style="flex:1;min-width:120px">
-          📋 간결 복사 <span style="font-size:10px;opacity:.6">(실명+전화)</span>
+          📋 간결 복사 <span style="font-size:10px;opacity:.6">(전화번호 제외)</span>
         </button>
         <button class="btn btn-ghost btn-sm" onclick="copyRes('detail')" style="flex:1;min-width:120px">
-          📋 상세 복사 <span style="font-size:10px;opacity:.6">(등급+닉네임)</span>
+          📋 상세 복사 <span style="font-size:10px;opacity:.6">(전화번호 포함)</span>
         </button>
       </div>
 
       <!-- 복사 양식 미리보기 -->
       <div style="background:rgba(0,0,0,.18);border-radius:9px;padding:10px 13px;margin-bottom:14px;font-size:11px;color:rgba(255,255,255,.4);line-height:1.8">
-        <span style="color:rgba(255,255,255,.28)">간결 양식 예시:</span> 1조: 장은화*(2985), 윤용섭(4186), 채창길(0213)<br>
-        <span style="color:rgba(255,255,255,.28)">상세 양식 예시:</span> 【1조】 [B] 독수리 / 윤용섭(4186) · [C] 솔개* / 장은화*(2985)
+        <span style="color:rgba(255,255,255,.28)">간결 예시:</span> 1조: 장은화*, 윤용섭, 채창길, 허병수<br>
+        <span style="color:rgba(255,255,255,.28)">상세 예시:</span> 1조: 장은화*(2985), 윤용섭(4186), 채창길(0213)
       </div>
 
       <div id="conflictWarn" class="warn-box" style="display:none"></div>
@@ -317,11 +317,15 @@ label.lbl{font-size:11px;color:var(--g4);margin-bottom:4px;display:block}
   <!-- ══════════════ TAB: HISTORY ══════════════ -->
   <div id="tab-history" class="panel">
     <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
         <span class="han" style="font-size:14px;color:var(--gold);letter-spacing:2px">편성 이력</span>
-        <button class="btn btn-danger btn-sm" onclick="clearHist()">전체 삭제</button>
+        <div class="btn-row">
+          <button class="btn btn-ghost btn-sm" onclick="exportHistory()">📥 내보내기</button>
+          <label class="btn btn-ghost btn-sm" style="cursor:pointer">📤 가져오기<input type="file" accept=".json" style="display:none" onchange="importHistory(event)"></label>
+          <button class="btn btn-danger btn-sm" onclick="clearHist()">전체 삭제</button>
+        </div>
       </div>
-      <p class="hint" style="margin-bottom:12px">📋간결 = 실명+* (여성) + 전화번호 양식 &nbsp;·&nbsp; 📋상세 = 등급+닉네임+실명 양식</p>
+      <p class="hint" style="margin-bottom:12px">📋간결 = 실명+*(여성), 전화번호 제외 &nbsp;·&nbsp; 📋상세 = 실명+*(여성)+전화번호 포함</p>
       <div id="histList"><div style="text-align:center;padding:28px;color:rgba(255,255,255,.22);font-size:13px">저장된 이력이 없습니다</div></div>
     </div>
   </div>

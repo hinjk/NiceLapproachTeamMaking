@@ -76,36 +76,31 @@ function sortByNick(arr) {
 }
 
 // ── 텍스트 포맷 ───────────────────────────────────────────────
-// 양식1: 1조: 장은화*(2985), 윤용섭(4186), 채창길(0213), 허병수(2985)
+// 간결: 전화번호 없음  예) 1조: 장은화*, 윤용섭, 채창길, 허병수
 function formatCompact(teams, date, note) {
   let t = `⛳ 골프 조 편성 결과 (${date})\n`;
   if (note) t += `📍 ${note}\n`;
   t += '\n';
   teams.forEach((team, i) => {
-    const sorted = sortByNick(team);
+    const sorted  = sortByNick(team);
+    const members = sorted.map(m => `${m.name}${m.gender==='F'?'*':''}`).join(', ');
+    t += ` ${i+1}조: ${members}\n`;
+  });
+  return t;
+}
+// 상세: 전화번호 포함  예) 1조: 장은화*(2985), 윤용섭(4186), 채창길(0213)
+function formatDetailed(teams, date, note) {
+  let t = `⛳ 골프 조 편성 결과 (${date})\n`;
+  if (note) t += `📍 ${note}\n`;
+  t += '\n';
+  teams.forEach((team, i) => {
+    const sorted  = sortByNick(team);
     const members = sorted.map(m => {
       const star = m.gender==='F' ? '*' : '';
       const ph   = m.phone ? `(${m.phone})` : '';
       return `${m.name}${star}${ph}`;
     }).join(', ');
     t += ` ${i+1}조: ${members}\n`;
-  });
-  return t;
-}
-// 양식2: 기존 상세 양식
-function formatDetailed(teams, date, note) {
-  let t = `⛳ 골프 조 편성 결과 (${date})\n`;
-  if (note) t += `📍 ${note}\n`;
-  t += '\n';
-  teams.forEach((team, i) => {
-    const sorted = sortByNick(team);
-    t += `【${i+1}조】\n`;
-    sorted.forEach(m => {
-      const ph   = m.phone ? ` (${m.phone})` : '';
-      const star = m.gender==='F' ? '*' : '';
-      t += `  [${m.pace}] ${m.nick} / ${m.name}${star}${ph}\n`;
-    });
-    t += '\n';
   });
   return t;
 }
@@ -556,6 +551,33 @@ function saveHist(){
   save(); $('saveHistBtn').textContent='✅ 저장됨'; toast('✅ 이력이 저장되었습니다');
 }
 
+// ── 이력 내보내기 / 가져오기 ──────────────────────────────────
+function exportHistory() {
+  if(!db.history.length){ toast('저장된 이력이 없습니다'); return; }
+  const b = new Blob([JSON.stringify(db.history, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(b);
+  a.download = `golf-history-${today()}.json`; a.click();
+  toast('📥 이력 내보내기 완료');
+}
+function importHistory(e) {
+  const file = e.target.files[0]; if(!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const arr = JSON.parse(ev.target.result);
+      if(!Array.isArray(arr)) throw new Error();
+      // 중복 id 제거 후 병합 (기존 이력 유지)
+      const existingIds = new Set(db.history.map(h=>h.id));
+      const newItems = arr.filter(h=>!existingIds.has(h.id));
+      db.history = [...newItems, ...db.history]
+        .sort((a,b) => b.date.localeCompare(a.date)); // 최신순 정렬
+      save(); renderHistory();
+      toast(`✅ ${newItems.length}건 가져오기 완료 (중복 ${arr.length-newItems.length}건 제외)`);
+    } catch { toast('❌ 파일 형식 오류'); }
+  };
+  r.readAsText(file); e.target.value='';
+}
+
 // ── 이력 렌더링 ───────────────────────────────────────────────
 function renderHistory(){
   const list=$('histList');
@@ -571,9 +593,9 @@ function renderHistory(){
           <div class="hi-date">${esc(h.date)}</div>
           <div class="hi-meta">${h.teams.length}팀 · ${total}명${h.note?' · '+esc(h.note):''}</div>
         </div>
-        <div style="display:flex;align-items:center;gap:7px">
-          <button class="btn btn-ghost btn-sm" onclick="copyHistFmt('${h.id}','compact',event)" title="간결 양식">📋간결</button>
-          <button class="btn btn-ghost btn-sm" onclick="copyHistFmt('${h.id}','detail',event)" title="상세 양식">📋상세</button>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="copyHistFmt('${h.id}','compact',event)">📋간결</button>
+          <button class="btn btn-ghost btn-sm" onclick="copyHistFmt('${h.id}','detail',event)">📋상세</button>
           <button class="btn btn-danger btn-sm" onclick="delHist('${h.id}',event)">삭제</button>
           <span id="arr-${h.id}" style="color:rgba(255,255,255,.28);font-size:11px;transition:transform .2s;display:inline-block">▼</span>
         </div>
