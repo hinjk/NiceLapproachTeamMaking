@@ -235,11 +235,16 @@ function updateSelCnt() {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  알고리즘 v5
-//  ① C·D 등급 팀내 각 최대 1명
-//  ② 전체 성비를 반영하여 각 팀 남/여 균형
-//  ③ A·B는 라운드로빈 균등 배분
-//  ④ 3개월 동일팀 회피
+//  알고리즘 v6
+//  ① C·D 팀내 각 최대 1명 (가능할 때만 — 불가피하면 허용)
+//  ② C·D 같은 팀 배정 최소화 (가능할 때만)
+//  ③ 전체 성비 반영 남/여 균형
+//  ④ 3개월 동일팀 회피 (strict 모드)
+//
+//  완화 단계:
+//    pass 0: strict 3개월 + C/D 분리 엄격
+//    pass 1: strict 3개월 + C/D 분리 완화 (overflow 허용)
+//    pass 2: 3개월 무시  + C/D 분리 완화
 // ══════════════════════════════════════════════════════════════
 function recentTeammates(memberId) {
   const cutoff=new Date(); cutoff.setMonth(cutoff.getMonth()-3);
@@ -254,89 +259,100 @@ function recentTeammates(memberId) {
   return result;
 }
 
-function tryAssign(participants, nTeams, strict) {
+/*
+  strict      : true → 3개월 동일팀 금지
+  cdStrict    : true → C/D 각각 팀당 1명 + C·D 같은 팀 금지 (가능한 경우에만 적용)
+  cdCanOverlap: 팀 수보다 C 또는 D가 많아서 어쩔 수 없이 겹칠 수밖에 없는 상황
+*/
+function tryAssign(participants, nTeams, strict, cdStrict) {
   const teams = Array.from({length:nTeams}, ()=>[]);
 
-  /* ─ ① C, D 각각 팀당 최대 1명 선배정 ─ */
-  const cPlayers = shuffle(participants.filter(m=>m.pace==='C'));
-  const dPlayers = shuffle(participants.filter(m=>m.pace==='D'));
+  const cAll = shuffle(participants.filter(m=>m.pace==='C'));
+  const dAll = shuffle(participants.filter(m=>m.pace==='D'));
 
-  // 팀 인덱스 셔플 (매번 다른 팀에 배정되도록)
-  const teamIdxC = shuffle([...Array(nTeams).keys()]);
-  const teamIdxD = shuffle([...Array(nTeams).keys()]);
+  // C/D가 팀 수보다 많으면 분리 보장 불가 → cdStrict 무시
+  const cOverflowExists = cAll.length > nTeams;
+  const dOverflowExists = dAll.length > nTeams;
+  const effectiveCDStrict = cdStrict && !cOverflowExists && !dOverflowExists;
 
-  const cAssigned=[], cOverflow=[];
-  cPlayers.forEach((m,i)=>{ i<nTeams ? cAssigned.push({m,t:teamIdxC[i]}) : cOverflow.push(m); });
-  const dAssigned=[], dOverflow=[];
-  dPlayers.forEach((m,i)=>{ i<nTeams ? dAssigned.push({m,t:teamIdxD[i]}) : dOverflow.push(m); });
+  /* ─ C, D 선배정 ─
+     effectiveCDStrict=true : C와 D가 같은 팀에 겹치지 않도록 배정
+     effectiveCDStrict=false: 그냥 각각 순서대로 배정 (겹쳐도 OK) */
+  if(effectiveCDStrict) {
+    // C와 D가 서로 다른 팀에 가도록 배정
+    const teamIdxC = shuffle([...Array(nTeams).keys()]);
+    // D는 C가 이미 간 팀을 피해서 배정
+    const cTeams = new Set(cAll.map((_,i)=>teamIdxC[i]));
+    const freeCTeams   = [...Array(nTeams).keys()].filter(t=>!cTeams.has(t));
+    const usedCTeams   = [...Array(nTeams).keys()].filter(t=>cTeams.has(t));
+    // D는 freeCTeams 우선, 모자라면 usedCTeams 사용
+    const teamIdxD = shuffle([...freeCTeams,...usedCTeams]);
 
-  // C와 D가 같은 팀에 겹치지 않도록 재조정 시도
-  const usedByCD = new Map(); // tIdx → ['C'|'D',...]
-  [...cAssigned,...dAssigned].forEach(({m,t})=>{
-    if(!usedByCD.has(t)) usedByCD.set(t,[]);
-    usedByCD.get(t).push(m.pace);
-  });
-  // 충돌(같은 팀에 C+D) 발생 시 null 리턴 → 재시도
-  for(const [, grades] of usedByCD){
-    if(grades.includes('C')&&grades.includes('D')) return null;
+    cAll.forEach((m,i)=>{ if(i<nTeams) teams[teamIdxC[i]].push(m); });
+    dAll.forEach((m,i)=>{ if(i<nTeams) teams[teamIdxD[i]].push(m); });
+
+    // 배정 후 C·D 같은팀 검증 (freeCTeams가 부족했을 경우 → retry)
+    for(const team of teams){
+      const hasC=team.some(m=>m.pace==='C');
+      const hasD=team.some(m=>m.pace==='D');
+      if(hasC&&hasD) return null;
+    }
+  } else {
+    // 완화 모드: 그냥 각각 셔플된 팀 순서대로 배정 (overflow는 나중에 pool로)
+    const teamIdxC = shuffle([...Array(nTeams).keys()]);
+    const teamIdxD = shuffle([...Array(nTeams).keys()]);
+    cAll.forEach((m,i)=>{ if(i<nTeams) teams[teamIdxC[i]].push(m); });
+    dAll.forEach((m,i)=>{ if(i<nTeams) teams[teamIdxD[i]].push(m); });
   }
 
-  cAssigned.forEach(({m,t})=>teams[t].push(m));
-  dAssigned.forEach(({m,t})=>teams[t].push(m));
+  // overflow (팀 수 초과분)는 일반 pool로
+  const cOverflow = cAll.slice(nTeams);
+  const dOverflow = dAll.slice(nTeams);
 
-  /* ─ ② 남은 인원(A·B + overflow) 성비 균형 배분 ─ */
+  /* ─ 나머지(A·B + overflow) 성비 균형 배분 ─ */
   const remaining = shuffle([
     ...participants.filter(m=>m.pace==='A'),
     ...participants.filter(m=>m.pace==='B'),
     ...cOverflow,
-    ...dOverflow
+    ...dOverflow,
   ]);
 
-  // 전체 성비 계산
-  const totalM = participants.filter(m=>m.gender==='M').length;
   const totalF = participants.filter(m=>m.gender==='F').length;
-  const ratio  = totalF / (totalM + totalF); // 여성 비율 (0~1)
-  // 각 팀 목표 여성 수
-  const teamSize    = Math.ceil(participants.length / nTeams);
+  const totalAll = participants.length;
+  const ratio = totalAll > 0 ? totalF / totalAll : 0;
+  const teamSize = Math.ceil(totalAll / nTeams);
   const targetFPerTeam = Math.round(teamSize * ratio);
 
-  // 남성/여성 풀 분리 (A/B/overflow만)
   const malePool   = shuffle(remaining.filter(m=>m.gender==='M'));
   const femalePool = shuffle(remaining.filter(m=>m.gender==='F'));
 
-  // 각 팀의 현재 여성 수 집계
-  function femCount(t){ return teams[t].filter(m=>m.gender==='F').length; }
-  function memCount(t){ return teams[t].length; }
+  const femCount = t => teams[t].filter(m=>m.gender==='F').length;
+  const memCount = t => teams[t].length;
+  const minTeam  = () => { let r=0; for(let t=1;t<nTeams;t++) if(memCount(t)<memCount(r)) r=t; return r; };
 
-  // 여성 먼저 배분 → 목표치까지, 그 다음 남성으로 채움
   let fi=0, mi=0;
+  // 여성: 목표치까지 배분
   for(let t=0;t<nTeams;t++){
-    const need = Math.max(0, targetFPerTeam - femCount(t));
+    const need=Math.max(0,targetFPerTeam-femCount(t));
     for(let n=0;n<need&&fi<femalePool.length;n++) teams[t].push(femalePool[fi++]);
   }
-  // 남은 여성은 아무 팀에나
-  while(fi<femalePool.length){
-    let minT=0;
-    for(let t=1;t<nTeams;t++) if(memCount(t)<memCount(minT)) minT=t;
-    teams[minT].push(femalePool[fi++]);
-  }
-  // 남성 배분
+  // 남은 여성
+  while(fi<femalePool.length) teams[minTeam()].push(femalePool[fi++]);
+  // 남성
   for(let t=0;t<nTeams;t++){
     while(memCount(t)<teamSize&&mi<malePool.length) teams[t].push(malePool[mi++]);
   }
-  while(mi<malePool.length){
-    let minT=0;
-    for(let t=1;t<nTeams;t++) if(memCount(t)<memCount(minT)) minT=t;
-    teams[minT].push(malePool[mi++]);
+  while(mi<malePool.length) teams[minTeam()].push(malePool[mi++]);
+
+  /* ─ C·D 각각 팀내 2명 초과 검증 (보장 가능한 경우만) ─ */
+  if(!cOverflowExists){
+    for(const team of teams) if(team.filter(m=>m.pace==='C').length>1) return null;
+  }
+  if(!dOverflowExists){
+    for(const team of teams) if(team.filter(m=>m.pace==='D').length>1) return null;
   }
 
-  /* ─ ③ C·D 중복 최종 검증 ─ */
-  for(const team of teams){
-    if(team.filter(m=>m.pace==='C').length>1) return null;
-    if(team.filter(m=>m.pace==='D').length>1) return null;
-  }
-
-  /* ─ ④ 3개월 동일팀 검증 ─ */
+  /* ─ 3개월 동일팀 검증 ─ */
   if(strict){
     for(const team of teams){
       const ids=team.map(m=>m.id);
@@ -355,26 +371,45 @@ function draw() {
   const participants=db.members.filter(m=>selSet.has(m.id));
   if(participants.length<4){ showErr('참가자가 최소 4명 이상이어야 합니다.'); return; }
 
-  const nTeams=Math.ceil(participants.length/4);
-  const cCount=participants.filter(m=>m.pace==='C').length;
-  const dCount=participants.filter(m=>m.pace==='D').length;
+  const nTeams  = Math.ceil(participants.length/4);
+  const cCount  = participants.filter(m=>m.pace==='C').length;
+  const dCount  = participants.filter(m=>m.pace==='D').length;
+  const cdTotal = cCount + dCount;
 
-  const warns=[];
-  if(cCount>nTeams) warns.push(`C등급(${cCount}명)이 팀 수(${nTeams})보다 많아 일부 팀에 C등급이 2명 배정될 수 있습니다.`);
-  if(dCount>nTeams) warns.push(`D등급(${dCount}명)이 팀 수(${nTeams})보다 많아 일부 팀에 D등급이 2명 배정될 수 있습니다.`);
-  if(warns.length){ $('conflictWarn').textContent='⚠️ '+warns.join(' '); $('conflictWarn').style.display=''; }
-
-  let teams=null, relaxed=false;
-  for(let i=0;i<3000&&!teams;i++) teams=tryAssign(participants,nTeams,true);
-  if(!teams){
-    relaxed=true;
-    for(let i=0;i<1000&&!teams;i++) teams=tryAssign(participants,nTeams,false);
+  // 경고 메시지 구성
+  const warns = [];
+  if(cCount > nTeams) warns.push(`C등급 ${cCount}명 > ${nTeams}팀`);
+  if(dCount > nTeams) warns.push(`D등급 ${dCount}명 > ${nTeams}팀`);
+  if(warns.length){
+    $('conflictWarn').textContent = `⚠️ ${warns.join(', ')} 이므로 일부 팀에 C/D 등급이 2명 배정될 수 있습니다.`;
+    $('conflictWarn').style.display = '';
   }
+
+  let teams = null;
+  let warnMsg = '';
+
+  // pass 0: 3개월 엄격 + C/D 분리 엄격 (2000회)
+  for(let i=0;i<2000&&!teams;i++) teams = tryAssign(participants, nTeams, true, true);
+
+  // pass 1: 3개월 엄격 + C/D 분리 완화 (1000회)
+  if(!teams){
+    for(let i=0;i<1000&&!teams;i++) teams = tryAssign(participants, nTeams, true, false);
+    if(teams && !warns.length) warnMsg = '⚠️ C/D 등급 분리 조건을 완전히 만족하는 배치를 찾지 못해 최선의 배치로 편성했습니다.';
+  }
+
+  // pass 2: 3개월 무시 + C/D 분리 완화 (1000회)
+  if(!teams){
+    for(let i=0;i<1000&&!teams;i++) teams = tryAssign(participants, nTeams, false, false);
+    if(teams) warnMsg = '⚠️ 최근 3개월 동일팀 및 C/D 분리 조건을 완전히 만족하는 배치를 찾지 못해 최선의 배치로 편성했습니다.';
+  }
+
   if(!teams){ showErr('조 편성 실패. 참가자를 늘려주세요.'); return; }
 
-  if(relaxed&&!warns.length){
-    $('conflictWarn').textContent='⚠️ 최근 3개월 동일팀 조건을 완전히 만족하는 배치를 찾지 못해 최선의 배치로 편성했습니다.';
-    $('conflictWarn').style.display='';
+  if(warnMsg && !warns.length){
+    $('conflictWarn').textContent = warnMsg;
+    $('conflictWarn').style.display = '';
+  } else if(warnMsg && warns.length){
+    $('conflictWarn').textContent += ' ' + warnMsg.replace('⚠️ ','');
   }
 
   lastTeams=teams; editMode=false;
