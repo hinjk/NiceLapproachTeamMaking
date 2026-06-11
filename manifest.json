@@ -1,13 +1,12 @@
 {
-  "name": "골프 조 편성기",
+  "name": "골프 조편성",
   "short_name": "골프조편성",
-  "description": "골프 동호회 조 편성기 - 남여 균형, 슬로우 플레이어 분리, 3개월 이력 관리",
-  "start_url": "/",
+  "description": "골프 모임 조편성 앱",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#1a3a2a",
-  "theme_color": "#1a3a2a",
-  "orientation": "portrait-primary",
-  "lang": "ko",
+  "background_color": "#1a472a",
+  "theme_color": "#1a472a",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icons/icon-192.png",
@@ -21,7 +20,5 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "categories": ["sports", "utilities"],
-  "screenshots": []
+  ]
 }
