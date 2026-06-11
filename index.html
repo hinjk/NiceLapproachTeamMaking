@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
     :root {
       --green-dark: #1a472a;
@@ -20,438 +20,535 @@
       --green-pale: #d8f3dc;
       --gold: #c9a84c;
       --gold-light: #f0d080;
-      --bg: #f5f7f0;
+      --bg: #eef2ea;
       --surface: #ffffff;
       --text: #1a2318;
       --text-muted: #6b7c6b;
-      --border: #d0dbd0;
+      --border: #cdd8c8;
       --danger: #c0392b;
-      --shadow: 0 2px 12px rgba(26,71,42,0.10);
+      --shadow: 0 2px 10px rgba(26,71,42,0.10);
+      --header-h: 96px;
     }
+
+    html, body { height: 100%; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
       background: var(--bg);
       color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
+      overflow: hidden;
+      height: 100vh;
     }
 
-    /* ── Header ── */
+    /* ══ HEADER ══ */
     header {
       background: var(--green-dark);
       color: #fff;
-      padding: 16px 20px 12px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
     }
-    header h1 {
-      font-size: 20px;
+    .header-top {
+      padding: 12px 16px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-top h1 { font-size: 19px; font-weight: 700; letter-spacing: -0.3px; }
+    .tab-bar {
+      display: flex;
+      border-top: 1px solid rgba(255,255,255,0.12);
+    }
+    .tab-btn {
+      flex: 1; padding: 8px 4px 7px;
+      background: none; border: none;
+      color: rgba(255,255,255,0.5);
+      font-size: 11px; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      transition: color 0.15s;
+    }
+    .tab-btn .ic { font-size: 18px; }
+    .tab-btn.active { color: var(--gold-light); }
+
+    /* ══ MAIN ══ */
+    .main {
+      position: fixed;
+      top: var(--header-h);
+      left: 0; right: 0; bottom: 0;
+      overflow: hidden;
+    }
+
+    /* ══ PANELS ══ */
+    .panel { display: none; height: 100%; overflow: hidden; }
+    .panel.active { display: flex; flex-direction: column; }
+
+    /* ────── MEMBERS PANEL ────── */
+    #panel-members {
+      flex-direction: column;
+    }
+    .members-toolbar {
+      padding: 10px 12px;
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    #member-scroll {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 10px 12px 20px;
+    }
+
+    /* ────── DRAW PANEL — SPLIT ────── */
+    #panel-draw {
+      flex-direction: column;
+    }
+    .draw-toolbar {
+      padding: 8px 12px;
+      display: flex;
+      gap: 7px;
+      align-items: center;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+    .draw-split {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* LEFT — member pool */
+    .split-left {
+      width: 42%;
+      border-right: 2px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .split-left-header {
+      background: var(--green-mid);
+      color: #fff;
+      padding: 7px 10px;
+      font-size: 12px;
       font-weight: 700;
-      letter-spacing: -0.3px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .pool-scroll {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 6px;
+    }
+
+    /* RIGHT — groups */
+    .split-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .groups-scroll {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 8px;
+    }
+
+    /* ── Pool member row ── */
+    .pool-row {
+      display: flex;
+      align-items: center;
+      padding: 7px 8px;
+      border-radius: 8px;
+      margin-bottom: 5px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      gap: 6px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .pool-row.female { border-color: #f9a8d4; background: #fff0f6; }
+    .pool-row.dragging { opacity: 0.3; }
+    .pool-row.drag-placeholder {
+      border: 2px dashed var(--green-light);
+      background: var(--green-pale);
+      opacity: 0.6;
+    }
+    .pool-row:active { background: var(--green-pale); }
+    .pool-row .pr-name { font-size: 13px; font-weight: 700; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pool-row .pr-sub  { font-size: 10px; color: var(--text-muted); }
+    .pool-row .pr-add  {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: none;
+      background: var(--green-mid);
+      color: #fff;
+      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    /* ── Group card ── */
+    .group-card {
+      background: var(--surface);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      margin-bottom: 8px;
+      overflow: hidden;
+      border: 2px solid transparent;
+      transition: border-color 0.15s;
+    }
+    .group-card.drag-over { border-color: var(--green-light); background: var(--green-pale); }
+    .group-card.selected-target { border-color: var(--gold); }
+    .group-head {
+      background: var(--green-dark);
+      color: #fff;
+      padding: 7px 10px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    header h1 span.logo { font-size: 22px; }
-
-    /* ── Tab Bar ── */
-    .tab-bar {
-      display: flex;
-      background: var(--green-dark);
-      border-top: 1px solid rgba(255,255,255,0.12);
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 10px 4px 8px;
-      background: none;
+    .group-head h3 { font-size: 13px; font-weight: 700; flex: 1; }
+    .tee-input {
+      padding: 4px 7px;
+      border-radius: 5px;
       border: none;
-      color: rgba(255,255,255,0.55);
+      background: rgba(255,255,255,0.18);
+      color: #fff;
       font-size: 12px;
-      cursor: pointer;
+      width: 82px;
+    }
+    .tee-input::placeholder { color: rgba(255,255,255,0.45); }
+    .g-count {
+      font-size: 11px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      padding: 2px 7px;
+      min-width: 30px;
+      text-align: center;
+    }
+    .g-count.full { background: var(--gold); color: #1a2318; font-weight: 700; }
+    .group-body {
+      padding: 7px 8px;
+      min-height: 52px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      transition: color 0.2s;
+      gap: 4px;
     }
-    .tab-btn .icon { font-size: 20px; }
-    .tab-btn.active { color: var(--gold-light); }
+    .empty-hint { font-size: 12px; color: var(--text-muted); padding: 8px 0; text-align: center; font-style: italic; }
 
-    /* ── Panels ── */
-    .panel { display: none; padding: 16px; }
-    .panel.active { display: block; }
-
-    /* ── Buttons ── */
-    .btn {
-      display: inline-flex;
+    /* member row inside group */
+    .gm-row {
+      display: flex;
       align-items: center;
+      padding: 5px 8px;
+      border-radius: 6px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
       gap: 6px;
-      padding: 9px 16px;
-      border-radius: 8px;
-      border: none;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
     }
-    .btn:active { transform: scale(0.97); opacity: 0.85; }
-    .btn-primary { background: var(--green-mid); color: #fff; }
-    .btn-gold { background: var(--gold); color: #1a2318; }
-    .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
-    .btn-danger { background: var(--danger); color: #fff; }
-    .btn-sm { padding: 6px 11px; font-size: 13px; }
-    .btn-xs { padding: 4px 8px; font-size: 12px; border-radius: 6px; }
-
-    /* ── Cards ── */
-    .card {
-      background: var(--surface);
-      border-radius: 12px;
-      box-shadow: var(--shadow);
-      margin-bottom: 12px;
-    }
-    .card-header {
-      padding: 14px 16px 10px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .card-body { padding: 14px 16px; }
-
-    /* ── Member List ── */
-    #member-list { margin-top: 12px; }
-    .member-item {
-      display: flex;
-      align-items: center;
-      padding: 10px 14px;
-      background: var(--surface);
-      border-radius: 10px;
-      margin-bottom: 8px;
-      box-shadow: 0 1px 4px rgba(26,71,42,0.07);
-      gap: 10px;
-    }
-    .member-item .avatar {
-      width: 38px;
-      height: 38px;
+    .gm-row.female { border-color: #f9a8d4; background: #fff0f6; }
+    .gm-row.dragging { opacity: 0.3; }
+    .gm-row .gm-name { font-size: 12px; font-weight: 700; flex: 1; }
+    .gm-row .gm-sub  { font-size: 10px; color: var(--text-muted); }
+    .gm-row .gm-rm   {
+      width: 22px; height: 22px;
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
+      border: none;
+      background: #fee2e2;
+      color: var(--danger);
+      font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
       flex-shrink: 0;
     }
-    .avatar.male { background: #dbeafe; }
-    .avatar.female { background: #fce7f3; }
-    .member-info { flex: 1; min-width: 0; }
-    .member-name { font-weight: 600; font-size: 15px; }
-    .member-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-    .member-actions { display: flex; gap: 5px; }
-    .badge-gender {
-      font-size: 11px;
-      padding: 2px 7px;
-      border-radius: 20px;
-      font-weight: 600;
-    }
-    .badge-male { background: #dbeafe; color: #1e40af; }
-    .badge-female { background: #fce7f3; color: #9d174d; }
 
-    /* ── Form ── */
-    .form-group { margin-bottom: 14px; }
-    .form-label { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; display: block; }
-    .form-input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      font-size: 15px;
-      background: var(--bg);
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .form-input:focus { border-color: var(--green-light); }
-    .radio-group { display: flex; gap: 10px; }
-    .radio-btn {
-      flex: 1;
-      padding: 9px;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      text-align: center;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.15s;
-    }
-    .radio-btn.selected { border-color: var(--green-mid); background: var(--green-pale); color: var(--green-dark); }
-
-    /* ── Modal ── */
-    .modal-overlay {
+    /* ── Add-to-group modal ── */
+    /* This modal pops up when you tap the + button: shows group list to pick */
+    .pick-modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.45);
-      z-index: 200;
+      background: rgba(0,0,0,0.5);
+      z-index: 500;
       align-items: flex-end;
       justify-content: center;
     }
-    .modal-overlay.open { display: flex; }
-    .modal {
+    .pick-modal.open { display: flex; }
+    .pick-sheet {
       background: var(--surface);
-      border-radius: 20px 20px 0 0;
+      border-radius: 18px 18px 0 0;
       width: 100%;
       max-width: 480px;
-      padding: 24px 20px 32px;
-      animation: slideUp 0.25s ease;
+      padding: 20px 16px 34px;
+      animation: slideUp 0.22s ease;
+      max-height: 70vh;
+      overflow-y: auto;
     }
     @keyframes slideUp {
-      from { transform: translateY(60px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+      from { transform: translateY(50px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
     }
-    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
-
-    /* ── Draw Panel ── */
-    .draw-workspace {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    /* Available members pool */
-    .pool-section { }
-    .pool-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-    }
-    .pool-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      min-height: 56px;
-      background: var(--surface);
-      border-radius: 10px;
-      padding: 10px;
-      border: 2px dashed var(--border);
-    }
-    .pool-grid.drag-over { border-color: var(--green-light); background: var(--green-pale); }
-
-    /* Draggable chip */
-    .member-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 6px 10px;
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: grab;
-      user-select: none;
-      touch-action: none;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-      transition: box-shadow 0.15s, transform 0.15s;
-    }
-    .member-chip:active { cursor: grabbing; }
-    .member-chip.dragging { opacity: 0.35; }
-    .member-chip.female-chip { border-color: #f9a8d4; background: #fff0f6; }
-    .member-chip .chip-handicap { font-size: 11px; color: var(--text-muted); font-weight: 400; }
-
-    /* Groups */
-    .groups-section { }
-    .group-card {
-      background: var(--surface);
-      border-radius: 12px;
-      box-shadow: var(--shadow);
-      margin-bottom: 10px;
-      overflow: hidden;
-    }
-    .group-header {
-      background: var(--green-dark);
-      color: #fff;
-      padding: 10px 14px;
+    .pick-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .pick-sub   { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+    .pick-group-btn {
       display: flex;
       align-items: center;
       justify-content: space-between;
-    }
-    .group-header h3 { font-size: 15px; font-weight: 700; }
-    .tee-time-input {
-      padding: 5px 9px;
-      border-radius: 6px;
-      border: none;
-      background: rgba(255,255,255,0.15);
-      color: #fff;
-      font-size: 13px;
-      width: 90px;
-      outline: none;
-    }
-    .tee-time-input::placeholder { color: rgba(255,255,255,0.5); }
-    .group-drop-zone {
-      min-height: 58px;
-      padding: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      align-items: center;
-    }
-    .group-drop-zone.drag-over { background: var(--green-pale); }
-    .group-drop-zone .empty-hint {
-      font-size: 13px;
-      color: var(--text-muted);
-      font-style: italic;
-    }
-    .group-count {
-      font-size: 12px;
-      background: rgba(255,255,255,0.2);
+      width: 100%;
+      padding: 12px 14px;
       border-radius: 10px;
-      padding: 2px 8px;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
     }
-    .group-count.full { background: var(--gold); color: #1a2318; }
+    .pick-group-btn:active { background: var(--green-pale); border-color: var(--green-light); }
+    .pick-group-btn .pgb-right { font-size: 12px; color: var(--text-muted); font-weight: 400; }
+    .pick-group-btn.disabled { opacity: 0.4; pointer-events: none; }
+    .pick-cancel {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: #f3f4f6;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+    }
 
-    /* Add/remove group buttons */
-    .group-controls { display: flex; gap: 8px; margin-bottom: 10px; }
-
-    /* ── Output ── */
+    /* ── RESULT PANEL ── */
+    #panel-result {
+      flex-direction: column;
+    }
+    .result-toolbar {
+      padding: 10px 12px;
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .result-scroll {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 12px;
+    }
+    .output-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
     .output-box {
       background: #1a2318;
       color: #d8f3dc;
       border-radius: 10px;
-      padding: 16px;
-      font-size: 14px;
-      line-height: 1.9;
+      padding: 14px;
+      font-size: 13px;
+      line-height: 2;
       white-space: pre-wrap;
       font-family: 'Courier New', monospace;
-      margin-top: 12px;
+      margin-bottom: 14px;
     }
-    .output-section { margin-top: 16px; }
-    .output-label { font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
+
+    /* ── MEMBER MODAL ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45); z-index: 400;
+      align-items: flex-end; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-sheet {
+      background: var(--surface);
+      border-radius: 18px 18px 0 0;
+      width: 100%; max-width: 480px;
+      padding: 22px 18px 32px;
+      animation: slideUp 0.22s ease;
+    }
+    .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 18px; }
+    .form-group { margin-bottom: 12px; }
+    .form-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; display: block; }
+    .form-input {
+      width: 100%; padding: 10px 12px;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      font-size: 15px; background: var(--bg); color: var(--text);
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--green-light); }
+    .radio-group { display: flex; gap: 8px; }
+    .radio-btn {
+      flex: 1; padding: 9px; border: 1.5px solid var(--border);
+      border-radius: 8px; text-align: center; cursor: pointer;
+      font-size: 14px; font-weight: 600;
+    }
+    .radio-btn.selected { border-color: var(--green-mid); background: var(--green-pale); color: var(--green-dark); }
+
+    /* ── Shared Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 8px 13px; border-radius: 8px; border: none;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn:active { opacity: 0.8; transform: scale(0.97); }
+    .btn-primary { background: var(--green-mid); color: #fff; }
+    .btn-gold    { background: var(--gold); color: #1a2318; }
+    .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+    .btn-danger  { background: var(--danger); color: #fff; }
+    .btn-sm { padding: 6px 10px; font-size: 12px; }
+
+    /* ── Ghost ── */
+    #drag-ghost {
+      position: fixed; pointer-events: none; z-index: 9999;
+      opacity: 0.9; transform: rotate(3deg) scale(1.05);
+      display: none; max-width: 160px;
+    }
+
+    /* ── Member list item ── */
+    .member-item {
+      display: flex; align-items: center;
+      padding: 10px 12px;
+      background: var(--surface); border-radius: 10px;
+      margin-bottom: 7px;
+      box-shadow: 0 1px 4px rgba(26,71,42,0.07);
+      gap: 9px;
+    }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; flex-shrink: 0;
+    }
+    .avatar.male   { background: #dbeafe; }
+    .avatar.female { background: #fce7f3; }
+    .mi-info { flex: 1; min-width: 0; }
+    .mi-name { font-weight: 700; font-size: 14px; }
+    .mi-sub  { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .mi-acts { display: flex; gap: 5px; }
+    .btn-xs { padding: 4px 8px; font-size: 11px; border-radius: 6px; }
+    .badge { font-size: 10px; padding: 1px 5px; border-radius: 10px; font-weight: 700; margin-left: 4px; }
+    .badge-m { background: #dbeafe; color: #1e40af; }
+    .badge-f { background: #fce7f3; color: #9d174d; }
+    .badge-h { background: var(--green-pale); color: var(--green-dark); }
+
+    .empty-state { text-align: center; padding: 36px 20px; color: var(--text-muted); }
+    .empty-state .ei { font-size: 36px; margin-bottom: 8px; }
 
     /* ── Toast ── */
     .toast {
-      position: fixed;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: #1a2318;
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 14px;
-      z-index: 999;
-      opacity: 0;
-      transition: all 0.3s;
-      white-space: nowrap;
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: #1a2318; color: #fff;
+      padding: 9px 18px; border-radius: 20px;
+      font-size: 13px; z-index: 9999; opacity: 0;
+      transition: all 0.25s; pointer-events: none; white-space: nowrap;
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    /* ── Drag ghost ── */
-    #drag-ghost {
-      position: fixed;
-      pointer-events: none;
-      z-index: 9999;
-      opacity: 0.85;
-      transform: rotate(4deg) scale(1.05);
-      display: none;
-    }
-
-    .section-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
-    .divider { height: 1px; background: var(--border); margin: 16px 0; }
-
-    .empty-state {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--text-muted);
-    }
-    .empty-state .icon { font-size: 40px; margin-bottom: 10px; }
-    .empty-state p { font-size: 15px; }
-
-    .handy-badge {
-      font-size: 11px;
-      padding: 1px 6px;
-      border-radius: 10px;
-      background: var(--green-pale);
-      color: var(--green-dark);
-      font-weight: 600;
-    }
   </style>
 </head>
 <body>
 
+<!-- ══════════ HEADER ══════════ -->
 <header>
-  <h1><span class="logo">⛳</span> 골프 조편성</h1>
+  <div class="header-top">
+    <h1>⛳ 골프 조편성</h1>
+  </div>
   <div class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('members')" id="tab-members">
-      <span class="icon">👥</span> 회원 명단
+    <button class="tab-btn active" id="tab-members" onclick="switchTab('members')">
+      <span class="ic">👥</span>회원 명단
     </button>
-    <button class="tab-btn" onclick="switchTab('draw')" id="tab-draw">
-      <span class="icon">🏌️</span> 조편성
+    <button class="tab-btn" id="tab-draw" onclick="switchTab('draw')">
+      <span class="ic">🏌️</span>조편성
     </button>
-    <button class="tab-btn" onclick="switchTab('result')" id="tab-result">
-      <span class="icon">📋</span> 결과
+    <button class="tab-btn" id="tab-result" onclick="switchTab('result')">
+      <span class="ic">📋</span>결과
     </button>
   </div>
 </header>
 
-<!-- ══════════════════ MEMBERS PANEL ══════════════════ -->
-<div class="panel active" id="panel-members">
-  <div class="section-actions">
-    <button class="btn btn-primary" onclick="openMemberModal()">➕ 회원 추가</button>
-    <button class="btn btn-outline btn-sm" onclick="exportMembers()">💾 내보내기</button>
-    <label class="btn btn-outline btn-sm" style="cursor:pointer;">
-      📂 불러오기
-      <input type="file" accept=".json" onchange="importMembers(event)" style="display:none" />
-    </label>
-  </div>
-  <div id="member-list"></div>
-</div>
+<div class="main">
 
-<!-- ══════════════════ DRAW PANEL ══════════════════ -->
-<div class="panel" id="panel-draw">
-  <div class="section-actions">
-    <button class="btn btn-gold" onclick="initDraw()">🔄 조편성 시작</button>
-    <button class="btn btn-primary btn-sm" onclick="addGroup()">➕ 조 추가</button>
-    <button class="btn btn-outline btn-sm" onclick="removeLastGroup()">➖ 조 삭제</button>
-  </div>
-
-  <div class="draw-workspace">
-    <div class="pool-section">
-      <div class="pool-title">📋 참가 회원 (끌어서 조에 넣으세요)</div>
-      <div class="pool-grid" id="pool" ondragover="onDragOver(event, 'pool')" ondrop="onDrop(event, 'pool')" ondragleave="onDragLeave(event)"></div>
+  <!-- ══════════ MEMBERS PANEL ══════════ -->
+  <div class="panel active" id="panel-members">
+    <div class="members-toolbar">
+      <button class="btn btn-primary" onclick="openMemberModal()">➕ 회원 추가</button>
+      <button class="btn btn-outline btn-sm" onclick="exportMembers()">💾 내보내기</button>
+      <label class="btn btn-outline btn-sm" style="cursor:pointer;">
+        📂 불러오기
+        <input type="file" accept=".json" onchange="importMembers(event)" style="display:none" />
+      </label>
     </div>
-
-    <div class="groups-section" id="groups-container"></div>
-  </div>
-</div>
-
-<!-- ══════════════════ RESULT PANEL ══════════════════ -->
-<div class="panel" id="panel-result">
-  <div class="section-actions">
-    <button class="btn btn-primary" onclick="generateOutput()">📊 결과 생성</button>
-    <button class="btn btn-outline btn-sm" onclick="copySubmitOutput()">📋 제출용 복사</button>
-    <button class="btn btn-outline btn-sm" onclick="copyManageOutput()">📋 관리용 복사</button>
-    <button class="btn btn-gold btn-sm" onclick="saveResult()">💾 결과 저장</button>
+    <div id="member-scroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px 20px;">
+      <div id="member-list"></div>
+    </div>
   </div>
 
-  <div class="output-section">
-    <div class="output-label">📤 제출용 (이름+전화번호)</div>
-    <div class="output-box" id="submit-output">조편성 결과가 여기에 표시됩니다.</div>
+  <!-- ══════════ DRAW PANEL ══════════ -->
+  <div class="panel" id="panel-draw">
+    <div class="draw-toolbar">
+      <button class="btn btn-gold" onclick="initDraw()">🔄 조편성 시작</button>
+      <button class="btn btn-primary btn-sm" onclick="addGroup()">➕ 조 추가</button>
+      <button class="btn btn-outline btn-sm" onclick="removeLastGroup()">➖ 조 삭제</button>
+      <button class="btn btn-outline btn-sm" onclick="generateOutput(); switchTab('result')">📊 결과보기</button>
+    </div>
+    <div class="draw-split">
+
+      <!-- LEFT: pool -->
+      <div class="split-left">
+        <div class="split-left-header">
+          👥 대기 회원 <span id="pool-count"></span>
+        </div>
+        <div class="pool-scroll" id="pool-scroll">
+          <div id="pool-list"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: groups -->
+      <div class="split-right">
+        <div class="groups-scroll" id="groups-scroll">
+          <div id="groups-container"></div>
+        </div>
+      </div>
+
+    </div>
   </div>
 
-  <div class="output-section">
-    <div class="output-label">🗂 관리용 (닉네임+핸디+성별)</div>
-    <div class="output-box" id="manage-output">조편성 결과가 여기에 표시됩니다.</div>
+  <!-- ══════════ RESULT PANEL ══════════ -->
+  <div class="panel" id="panel-result">
+    <div class="result-toolbar">
+      <button class="btn btn-primary" onclick="generateOutput()">🔄 새로고침</button>
+      <button class="btn btn-outline btn-sm" onclick="copyOutput('submit')">📋 제출용 복사</button>
+      <button class="btn btn-outline btn-sm" onclick="copyOutput('manage')">📋 관리용 복사</button>
+      <button class="btn btn-gold btn-sm" onclick="saveResult()">💾 저장</button>
+    </div>
+    <div class="result-scroll">
+      <div class="output-label">📤 제출용 (이름 + 전화번호)</div>
+      <div class="output-box" id="submit-output">조편성 후 결과보기를 눌러주세요.</div>
+      <div class="output-label">🗂 관리용 (닉네임 · 핸디 · 성별)</div>
+      <div class="output-box" id="manage-output">조편성 후 결과보기를 눌러주세요.</div>
+    </div>
   </div>
-</div>
 
-<!-- ══════════════════ MEMBER MODAL ══════════════════ -->
+</div><!-- /main -->
+
+<!-- ══════════ MEMBER EDIT MODAL ══════════ -->
 <div class="modal-overlay" id="member-modal">
-  <div class="modal">
+  <div class="modal-sheet">
     <div class="modal-title" id="modal-title">회원 추가</div>
     <div class="form-group">
       <label class="form-label">닉네임</label>
@@ -472,204 +569,172 @@
     <div class="form-group">
       <label class="form-label">성별</label>
       <div class="radio-group">
-        <div class="radio-btn selected" id="rb-male" onclick="selectGender('male')">🏌️ 남성</div>
-        <div class="radio-btn" id="rb-female" onclick="selectGender('female')">🏌️‍♀️ 여성</div>
+        <div class="radio-btn selected" id="rb-male"   onclick="selectGender('male')">🏌️ 남성</div>
+        <div class="radio-btn"          id="rb-female" onclick="selectGender('female')">🏌️‍♀️ 여성</div>
       </div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:8px;">
+    <div style="display:flex;gap:8px;margin-top:10px;">
       <button class="btn btn-primary" style="flex:1" onclick="saveMember()">저장</button>
-      <button class="btn btn-outline" style="flex:1" onclick="closeModal()">취소</button>
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('member-modal')">취소</button>
     </div>
   </div>
 </div>
 
-<!-- drag ghost -->
+<!-- ══════════ PICK GROUP MODAL ══════════ -->
+<!-- Shown when tapping + on a pool member -->
+<div class="pick-modal" id="pick-modal">
+  <div class="pick-sheet">
+    <div class="pick-title" id="pick-title">조 선택</div>
+    <div class="pick-sub" id="pick-sub"></div>
+    <div id="pick-group-list"></div>
+    <button class="pick-cancel" onclick="closeModal('pick-modal')">취소</button>
+  </div>
+</div>
+
+<!-- Drag ghost -->
 <div id="drag-ghost"></div>
 <div class="toast" id="toast"></div>
 
 <script>
-// ════════════════════════════════════
-//  STATE
-// ════════════════════════════════════
+// ═══════════════════════════════════════
+//   STATE
+// ═══════════════════════════════════════
 let members = JSON.parse(localStorage.getItem('golf_members') || '[]');
-let groups = [];          // [{id, teeTime, memberIds:[]}]
-let poolIds = [];         // member ids not yet placed
-let editingId = null;
+let groups  = [];   // [{id, label, teeTime, memberIds:[]}]
+let poolIds = [];   // member ids not in any group
+
+let editingId    = null;
 let selectedGender = 'male';
+let pickingMemberId = null;   // which member we're placing via the pick modal
 
 // drag state
-let draggingId = null;
-let draggingFrom = null; // 'pool' | groupId
-let ghostEl = null;
-let touchStartX = 0, touchStartY = 0;
+let dragId   = null;
+let dragFrom = null; // 'pool' | group.id
 
-// ════════════════════════════════════
-//  TABS
-// ════════════════════════════════════
-function switchTab(tab) {
-  ['members','draw','result'].forEach(t => {
-    document.getElementById('panel-' + t).classList.toggle('active', t === tab);
-    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+// ═══════════════════════════════════════
+//   TABS
+// ═══════════════════════════════════════
+function switchTab(t) {
+  ['members','draw','result'].forEach(k => {
+    document.getElementById('panel-' + k).classList.toggle('active', k === t);
+    document.getElementById('tab-'   + k).classList.toggle('active', k === t);
   });
 }
 
-// ════════════════════════════════════
-//  PERSIST
-// ════════════════════════════════════
-function save() {
-  localStorage.setItem('golf_members', JSON.stringify(members));
-}
+// ═══════════════════════════════════════
+//   PERSIST
+// ═══════════════════════════════════════
+function persist() { localStorage.setItem('golf_members', JSON.stringify(members)); }
 
-// ════════════════════════════════════
-//  MEMBERS
-// ════════════════════════════════════
+// ═══════════════════════════════════════
+//   MEMBERS
+// ═══════════════════════════════════════
 function renderMembers() {
-  const list = document.getElementById('member-list');
+  const el = document.getElementById('member-list');
   if (!members.length) {
-    list.innerHTML = `<div class="empty-state"><div class="icon">👥</div><p>등록된 회원이 없습니다.<br>회원 추가 버튼을 눌러 시작하세요.</p></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="ei">👥</div><p>등록된 회원이 없습니다</p></div>`;
     return;
   }
-  list.innerHTML = members.map(m => `
+  el.innerHTML = members.map(m => `
     <div class="member-item">
-      <div class="avatar ${m.gender === 'female' ? 'female' : 'male'}">${m.gender === 'female' ? '👩' : '👨'}</div>
-      <div class="member-info">
-        <div class="member-name">${m.name}${m.gender === 'female' ? '*' : ''}
-          <span class="badge-gender ${m.gender === 'female' ? 'badge-female' : 'badge-male'}">${m.gender === 'female' ? '여' : '남'}</span>
-          <span class="handy-badge">H${m.handy || 0}</span>
+      <div class="avatar ${m.gender === 'female' ? 'female':'male'}">${m.gender==='female'?'👩':'👨'}</div>
+      <div class="mi-info">
+        <div class="mi-name">${m.name}${m.gender==='female'?'*':''}
+          <span class="badge ${m.gender==='female'?'badge-f':'badge-m'}">${m.gender==='female'?'여':'남'}</span>
+          <span class="badge badge-h">H${m.handy||0}</span>
         </div>
-        <div class="member-sub">${m.nickname} · ${m.phone}</div>
+        <div class="mi-sub">${m.nickname||'-'} · ${m.phone}</div>
       </div>
-      <div class="member-actions">
-        <button class="btn btn-outline btn-xs" onclick="openEditModal('${m.id}')">✏️</button>
-        <button class="btn btn-danger btn-xs" onclick="deleteMember('${m.id}')">🗑</button>
+      <div class="mi-acts">
+        <button class="btn btn-outline btn-xs btn-sm" onclick="openEditModal('${m.id}')">✏️</button>
+        <button class="btn btn-danger  btn-xs btn-sm" onclick="deleteMember('${m.id}')">🗑</button>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 function openMemberModal() {
   editingId = null;
   document.getElementById('modal-title').textContent = '회원 추가';
-  document.getElementById('f-nickname').value = '';
-  document.getElementById('f-name').value = '';
-  document.getElementById('f-phone').value = '';
-  document.getElementById('f-handy').value = '';
+  ['f-nickname','f-name','f-phone','f-handy'].forEach(id => document.getElementById(id).value = '');
   selectGender('male');
   document.getElementById('member-modal').classList.add('open');
 }
-
 function openEditModal(id) {
-  const m = members.find(x => x.id === id);
-  if (!m) return;
+  const m = members.find(x => x.id === id); if (!m) return;
   editingId = id;
   document.getElementById('modal-title').textContent = '회원 수정';
-  document.getElementById('f-nickname').value = m.nickname;
-  document.getElementById('f-name').value = m.name;
-  document.getElementById('f-phone').value = m.phone;
-  document.getElementById('f-handy').value = m.handy || '';
+  document.getElementById('f-nickname').value = m.nickname || '';
+  document.getElementById('f-name').value     = m.name;
+  document.getElementById('f-phone').value    = m.phone;
+  document.getElementById('f-handy').value    = m.handy || '';
   selectGender(m.gender);
   document.getElementById('member-modal').classList.add('open');
 }
-
-function closeModal() {
-  document.getElementById('member-modal').classList.remove('open');
-}
-
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function selectGender(g) {
   selectedGender = g;
-  document.getElementById('rb-male').classList.toggle('selected', g === 'male');
-  document.getElementById('rb-female').classList.toggle('selected', g === 'female');
+  document.getElementById('rb-male').classList.toggle('selected', g==='male');
+  document.getElementById('rb-female').classList.toggle('selected', g==='female');
 }
-
 function saveMember() {
   const nickname = document.getElementById('f-nickname').value.trim();
-  const name = document.getElementById('f-name').value.trim();
-  const phone = formatPhone(document.getElementById('f-phone').value.trim());
-  const handy = parseInt(document.getElementById('f-handy').value) || 0;
-
-  if (!name) { showToast('이름을 입력하세요'); return; }
-  if (!phone) { showToast('전화번호를 입력하세요'); return; }
-
+  const name     = document.getElementById('f-name').value.trim();
+  const phone    = fmtPhone(document.getElementById('f-phone').value.trim());
+  const handy    = parseInt(document.getElementById('f-handy').value) || 0;
+  if (!name)  { toast('이름을 입력하세요'); return; }
+  if (!phone) { toast('전화번호를 입력하세요'); return; }
   if (editingId) {
-    const idx = members.findIndex(x => x.id === editingId);
-    members[idx] = { ...members[idx], nickname, name, phone, handy, gender: selectedGender };
+    const i = members.findIndex(x => x.id === editingId);
+    members[i] = { ...members[i], nickname, name, phone, handy, gender: selectedGender };
   } else {
     members.push({ id: uid(), nickname, name, phone, handy, gender: selectedGender });
   }
-  save();
-  renderMembers();
-  closeModal();
-  showToast(editingId ? '수정되었습니다' : '회원이 추가되었습니다');
+  persist(); renderMembers(); closeModal('member-modal');
+  toast(editingId ? '수정되었습니다' : '회원 추가 완료');
 }
-
 function deleteMember(id) {
   if (!confirm('삭제하시겠습니까?')) return;
   members = members.filter(m => m.id !== id);
-  save();
-  renderMembers();
-  showToast('삭제되었습니다');
+  persist(); renderMembers(); toast('삭제되었습니다');
 }
-
-function formatPhone(p) {
-  const d = p.replace(/\D/g, '');
-  if (d.length === 11) return d.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
-  if (d.length === 10) return d.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
-  return p;
-}
-
 function exportMembers() {
-  const blob = new Blob([JSON.stringify(members, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = '골프_회원명단.json';
-  a.click();
-  showToast('내보내기 완료');
+  dl(JSON.stringify(members, null, 2), '골프_회원명단.json');
+  toast('내보내기 완료');
 }
-
 function importMembers(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
+  const file = e.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
     try {
-      const data = JSON.parse(ev.target.result);
-      if (Array.isArray(data)) {
-        members = data;
-        save();
-        renderMembers();
-        showToast(`${data.length}명 불러오기 완료`);
-      }
-    } catch { showToast('파일 형식 오류'); }
+      const d = JSON.parse(ev.target.result);
+      if (Array.isArray(d)) { members = d; persist(); renderMembers(); toast(d.length + '명 불러오기 완료'); }
+    } catch { toast('파일 오류'); }
   };
-  reader.readAsText(file);
-  e.target.value = '';
+  r.readAsText(file); e.target.value = '';
 }
 
-// ════════════════════════════════════
-//  DRAW
-// ════════════════════════════════════
+// ═══════════════════════════════════════
+//   DRAW
+// ═══════════════════════════════════════
 function initDraw() {
-  if (!members.length) { showToast('회원을 먼저 등록하세요'); return; }
+  if (!members.length) { toast('회원을 먼저 등록하세요'); return; }
   poolIds = members.map(m => m.id);
-  groups = [makeGroup(1), makeGroup(2), makeGroup(3)];
+  groups  = [makeGroup(1), makeGroup(2), makeGroup(3)];
   renderDraw();
-  showToast('조편성을 시작합니다! 끌어서 조에 넣으세요 🏌️');
+  toast('조편성 시작! + 버튼 또는 끌어서 조에 넣으세요 🏌️');
 }
 
 function makeGroup(n) {
   return { id: 'g' + uid(), label: n + '조', teeTime: '', memberIds: [] };
 }
-
 function addGroup() {
   if (!groups.length) { initDraw(); return; }
   groups.push(makeGroup(groups.length + 1));
   renderDraw();
 }
-
 function removeLastGroup() {
   if (!groups.length) return;
   const last = groups.pop();
-  // return members to pool
   last.memberIds.forEach(id => { if (!poolIds.includes(id)) poolIds.push(id); });
   renderDraw();
 }
@@ -679,59 +744,130 @@ function renderDraw() {
   renderGroups();
 }
 
+/* ── Pool ── */
 function renderPool() {
-  const pool = document.getElementById('pool');
+  const cnt = document.getElementById('pool-count');
+  cnt.textContent = poolIds.length ? '(' + poolIds.length + ')' : '(없음)';
+
+  const el = document.getElementById('pool-list');
   if (!poolIds.length) {
-    pool.innerHTML = '<span style="color:var(--text-muted);font-size:13px;">모든 회원이 조에 배정되었습니다 ✅</span>';
-  } else {
-    pool.innerHTML = poolIds.map(id => {
-      const m = members.find(x => x.id === id);
-      return m ? chipHTML(m) : '';
-    }).join('');
-    attachChipEvents();
+    el.innerHTML = '<div class="empty-state" style="padding:20px 0"><div class="ei">✅</div><p style="font-size:12px">모두 배정됨</p></div>';
+    return;
   }
-}
-
-function chipHTML(m) {
-  const isFemale = m.gender === 'female';
-  return `<div class="member-chip ${isFemale ? 'female-chip' : ''}"
-    data-id="${m.id}"
-    draggable="true"
-    ondragstart="onDragStart(event, '${m.id}')"
-    ondragend="onDragEnd(event)"
-    ontouchstart="onTouchStart(event, '${m.id}')"
-    ontouchmove="onTouchMove(event)"
-    ontouchend="onTouchEnd(event)">
-    ${isFemale ? '👩' : '👨'} ${m.name}${isFemale ? '*' : ''} <span class="chip-handicap">H${m.handy || 0}</span>
-  </div>`;
-}
-
-function renderGroups() {
-  const container = document.getElementById('groups-container');
-  container.innerHTML = groups.map(g => {
-    const count = g.memberIds.length;
-    const isFull = count >= 4;
-    const chips = g.memberIds.map(id => {
-      const m = members.find(x => x.id === id);
-      return m ? chipHTML(m) : '';
-    }).join('');
-    return `
-    <div class="group-card">
-      <div class="group-header">
-        <h3>⛳ ${g.label}</h3>
-        <input class="tee-time-input" type="time" value="${g.teeTime}" placeholder="티타임"
-          onchange="setTeeTime('${g.id}', this.value)" />
-        <span class="group-count ${isFull ? 'full' : ''}">${count}/4</span>
+  el.innerHTML = poolIds.map(id => {
+    const m = members.find(x => x.id === id);
+    if (!m) return '';
+    const f = m.gender === 'female';
+    return `<div class="pool-row ${f?'female':''}"
+      data-id="${m.id}" data-src="pool"
+      draggable="true"
+      ondragstart="onDragStart(event,'${m.id}','pool')"
+      ondragend="onDragEnd(event)"
+      ontouchstart="onTouchStart(event,'${m.id}','pool')"
+      ontouchmove="onTouchMove(event)"
+      ontouchend="onTouchEnd(event)">
+      <div style="flex:1;min-width:0">
+        <div class="pr-name">${m.name}${f?'*':''}</div>
+        <div class="pr-sub">${m.nickname||''} H${m.handy||0}</div>
       </div>
-      <div class="group-drop-zone" id="zone-${g.id}"
-        ondragover="onDragOver(event, '${g.id}')"
-        ondrop="onDrop(event, '${g.id}')"
-        ondragleave="onDragLeave(event)">
-        ${chips || '<span class="empty-hint">여기에 회원을 끌어오세요</span>'}
+      <button class="pr-add" onclick="openPickModal('${m.id}')" title="조 선택">＋</button>
+    </div>`;
+  }).join('');
+
+  // pool drop zone
+  const scroll = document.getElementById('pool-scroll');
+  scroll.ondragover  = e => { e.preventDefault(); scroll.style.background='#e8f5e9'; };
+  scroll.ondragleave = e => { scroll.style.background = ''; };
+  scroll.ondrop      = e => { e.preventDefault(); scroll.style.background=''; onDrop('pool'); };
+}
+
+/* ── Groups ── */
+function renderGroups() {
+  const el = document.getElementById('groups-container');
+  if (!groups.length) {
+    el.innerHTML = '<div class="empty-state"><div class="ei">⛳</div><p>조편성 시작 버튼을 눌러주세요</p></div>';
+    return;
+  }
+  el.innerHTML = groups.map(g => {
+    const cnt  = g.memberIds.length;
+    const full = cnt >= 4;
+    const members_html = g.memberIds.map(id => {
+      const m = members.find(x => x.id === id);
+      if (!m) return '';
+      const f = m.gender === 'female';
+      return `<div class="gm-row ${f?'female':''}"
+        data-id="${m.id}" data-src="${g.id}"
+        draggable="true"
+        ondragstart="onDragStart(event,'${m.id}','${g.id}')"
+        ondragend="onDragEnd(event)"
+        ontouchstart="onTouchStart(event,'${m.id}','${g.id}')"
+        ontouchmove="onTouchMove(event)"
+        ontouchend="onTouchEnd(event)">
+        <div style="flex:1;min-width:0">
+          <div class="gm-name">${m.name}${f?'*':''}</div>
+          <div class="gm-sub">H${m.handy||0}</div>
+        </div>
+        <button class="gm-rm" onclick="removeMemberFromGroup('${g.id}','${m.id}')" title="빼기">✕</button>
+      </div>`;
+    }).join('');
+
+    return `<div class="group-card" id="gc-${g.id}"
+        ondragover="onDragOver(event,'${g.id}')"
+        ondragleave="onDragLeave(event,'${g.id}')"
+        ondrop="onDropGroup(event,'${g.id}')">
+      <div class="group-head">
+        <h3>⛳ ${g.label}</h3>
+        <input class="tee-input" type="time" value="${g.teeTime}" placeholder="티타임"
+          onchange="setTeeTime('${g.id}',this.value)" />
+        <span class="g-count ${full?'full':''}">${cnt}/4</span>
+      </div>
+      <div class="group-body" id="gb-${g.id}">
+        ${members_html || '<div class="empty-hint">여기에 회원을 끌어오거나<br>+ 버튼으로 추가하세요</div>'}
       </div>
     </div>`;
   }).join('');
-  attachChipEvents();
+}
+
+/* ── Pick Modal (tap + to choose group) ── */
+function openPickModal(memberId) {
+  if (!groups.length) { toast('조편성을 먼저 시작하세요'); return; }
+  pickingMemberId = memberId;
+  const m = members.find(x => x.id === memberId);
+  document.getElementById('pick-title').textContent = (m.name) + (m.gender==='female'?'*':'') + ' — 조 선택';
+  document.getElementById('pick-sub').textContent   = '배정할 조를 선택하세요';
+
+  const list = document.getElementById('pick-group-list');
+  list.innerHTML = groups.map(g => {
+    const cnt  = g.memberIds.length;
+    const full = cnt >= 4;
+    return `<button class="pick-group-btn ${full?'disabled':''}" onclick="assignToGroup('${g.id}')">
+      <span>⛳ ${g.label}${g.teeTime ? ' · ' + g.teeTime : ''}</span>
+      <span class="pgb-right">${cnt}/4${full?' (마감)':''}</span>
+    </button>`;
+  }).join('');
+
+  document.getElementById('pick-modal').classList.add('open');
+}
+
+function assignToGroup(gid) {
+  if (!pickingMemberId) return;
+  const g = groups.find(x => x.id === gid);
+  if (!g || g.memberIds.length >= 4) { toast('해당 조는 이미 4명입니다'); return; }
+  poolIds = poolIds.filter(x => x !== pickingMemberId);
+  // also remove from any other group just in case
+  groups.forEach(gr => { gr.memberIds = gr.memberIds.filter(x => x !== pickingMemberId); });
+  g.memberIds.push(pickingMemberId);
+  pickingMemberId = null;
+  closeModal('pick-modal');
+  renderDraw();
+}
+
+function removeMemberFromGroup(gid, mid) {
+  const g = groups.find(x => x.id === gid);
+  if (!g) return;
+  g.memberIds = g.memberIds.filter(x => x !== mid);
+  if (!poolIds.includes(mid)) poolIds.push(mid);
+  renderDraw();
 }
 
 function setTeeTime(gid, val) {
@@ -739,257 +875,226 @@ function setTeeTime(gid, val) {
   if (g) g.teeTime = val;
 }
 
-// ════════════════════════════════════
-//  DRAG & DROP (Desktop)
-// ════════════════════════════════════
-function onDragStart(e, id) {
-  draggingId = id;
-  draggingFrom = findLocation(id);
+// ═══════════════════════════════════════
+//   DRAG & DROP — DESKTOP
+// ═══════════════════════════════════════
+function onDragStart(e, id, src) {
+  dragId = id; dragFrom = src;
   e.dataTransfer.effectAllowed = 'move';
   setTimeout(() => {
-    const el = e.target;
+    const el = document.querySelector(`[data-id="${id}"]`);
     if (el) el.classList.add('dragging');
   }, 0);
 }
-
 function onDragEnd(e) {
-  document.querySelectorAll('.member-chip.dragging').forEach(el => el.classList.remove('dragging'));
-  draggingId = null;
-  draggingFrom = null;
+  document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+  dragId = null; dragFrom = null;
 }
-
-function onDragOver(e, target) {
+function onDragOver(e, gid) {
   e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-  const zone = target === 'pool' ? document.getElementById('pool') : document.getElementById('zone-' + target);
-  if (zone) zone.classList.add('drag-over');
+  document.getElementById('gc-' + gid).classList.add('drag-over');
 }
-
-function onDragLeave(e) {
-  e.currentTarget.classList.remove('drag-over');
+function onDragLeave(e, gid) {
+  document.getElementById('gc-' + gid).classList.remove('drag-over');
 }
-
-function onDrop(e, target) {
+function onDropGroup(e, gid) {
   e.preventDefault();
-  e.currentTarget.classList.remove('drag-over');
-  if (!draggingId) return;
-  moveMember(draggingId, draggingFrom, target);
+  document.getElementById('gc-' + gid).classList.remove('drag-over');
+  if (!dragId) return;
+  moveMember(dragId, dragFrom, gid);
+}
+function onDrop(target) {
+  if (!dragId) return;
+  moveMember(dragId, dragFrom, target);
 }
 
-// ════════════════════════════════════
-//  TOUCH DRAG (Mobile)
-// ════════════════════════════════════
-function attachChipEvents() {}  // Events are inline
+// ═══════════════════════════════════════
+//   DRAG & DROP — TOUCH (MOBILE)
+// ═══════════════════════════════════════
+let touchDragging = false;
 
-function onTouchStart(e, id) {
-  draggingId = id;
-  draggingFrom = findLocation(id);
-  touchStartX = e.touches[0].clientX;
-  touchStartY = e.touches[0].clientY;
-
-  // Create ghost
-  const src = e.currentTarget;
-  ghostEl = document.getElementById('drag-ghost');
-  ghostEl.innerHTML = src.outerHTML;
-  ghostEl.style.display = 'block';
-  ghostEl.style.left = (e.touches[0].clientX - 30) + 'px';
-  ghostEl.style.top = (e.touches[0].clientY - 20) + 'px';
-  src.classList.add('dragging');
+function onTouchStart(e, id, src) {
+  // only initiate drag if finger moves significantly
+  dragId = id; dragFrom = src; touchDragging = false;
+  const t = e.touches[0];
+  _txStart = t.clientX; _tyStart = t.clientY;
 }
+let _txStart = 0, _tyStart = 0;
 
 function onTouchMove(e) {
+  const t = e.touches[0];
+  const dx = Math.abs(t.clientX - _txStart);
+  const dy = Math.abs(t.clientY - _tyStart);
+
+  if (!touchDragging && (dx > 8 || dy > 8)) {
+    touchDragging = true;
+    const src = document.querySelector(`[data-id="${dragId}"]`);
+    if (src) src.classList.add('dragging');
+
+    const ghost = document.getElementById('drag-ghost');
+    ghost.innerHTML = src ? src.cloneNode(true).outerHTML : '';
+    ghost.style.display = 'block';
+  }
+  if (!touchDragging) return;
+
   e.preventDefault();
-  if (!draggingId) return;
-  const touch = e.touches[0];
-  ghostEl = document.getElementById('drag-ghost');
-  ghostEl.style.left = (touch.clientX - 30) + 'px';
-  ghostEl.style.top = (touch.clientY - 20) + 'px';
+  const ghost = document.getElementById('drag-ghost');
+  ghost.style.left = (t.clientX - 40) + 'px';
+  ghost.style.top  = (t.clientY - 20) + 'px';
 
   // highlight drop target
   document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-  const el = document.elementFromPoint(touch.clientX, touch.clientY);
-  const zone = el ? el.closest('.group-drop-zone, .pool-grid') : null;
-  if (zone) zone.classList.add('drag-over');
+  ghost.style.display = 'none';
+  const under = document.elementFromPoint(t.clientX, t.clientY);
+  ghost.style.display = 'block';
+  const gc = under && under.closest('.group-card');
+  if (gc) gc.classList.add('drag-over');
 }
 
 function onTouchEnd(e) {
-  if (!draggingId) return;
   const ghost = document.getElementById('drag-ghost');
   ghost.style.display = 'none';
-
-  document.querySelectorAll('.member-chip.dragging').forEach(el => el.classList.remove('dragging'));
-
-  const touch = e.changedTouches[0];
-  const el = document.elementFromPoint(touch.clientX, touch.clientY);
-  const dropZone = el ? el.closest('.group-drop-zone, .pool-grid') : null;
-
+  document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
   document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
 
-  if (dropZone) {
-    let target = 'pool';
-    if (dropZone.classList.contains('group-drop-zone')) {
-      const zoneId = dropZone.id.replace('zone-', '');
-      target = zoneId;
-    }
-    moveMember(draggingId, draggingFrom, target);
+  if (!touchDragging || !dragId) { dragId = null; dragFrom = null; touchDragging = false; return; }
+
+  const t = e.changedTouches[0];
+  ghost.style.display = 'none';
+  const under = document.elementFromPoint(t.clientX, t.clientY);
+  ghost.style.display = 'none';
+
+  const gc = under && under.closest('.group-card');
+  const isPool = under && under.closest('#pool-scroll');
+
+  let target = null;
+  if (gc) {
+    // extract group id from gc id attr: "gc-GGGGG"
+    target = gc.id.replace('gc-', '');
+  } else if (isPool) {
+    target = 'pool';
   }
 
-  draggingId = null;
-  draggingFrom = null;
+  if (target) moveMember(dragId, dragFrom, target);
+
+  dragId = null; dragFrom = null; touchDragging = false;
 }
 
-// ════════════════════════════════════
-//  MOVE LOGIC
-// ════════════════════════════════════
-function findLocation(id) {
-  if (poolIds.includes(id)) return 'pool';
-  const g = groups.find(g => g.memberIds.includes(id));
-  return g ? g.id : 'pool';
-}
-
+// ═══════════════════════════════════════
+//   MOVE LOGIC
+// ═══════════════════════════════════════
 function moveMember(id, from, to) {
   if (from === to) return;
 
-  // Check target group capacity
+  // Capacity check
   if (to !== 'pool') {
-    const targetGroup = groups.find(g => g.id === to);
-    if (!targetGroup) return;
-    if (targetGroup.memberIds.length >= 4) {
-      showToast('⚠️ 해당 조는 이미 4명입니다');
-      return;
-    }
+    const tg = groups.find(g => g.id === to);
+    if (!tg) return;
+    if (tg.memberIds.length >= 4) { toast('⚠️ 해당 조는 이미 4명입니다'); return; }
   }
 
   // Remove from source
-  if (from === 'pool') {
-    poolIds = poolIds.filter(x => x !== id);
-  } else {
-    const srcGroup = groups.find(g => g.id === from);
-    if (srcGroup) srcGroup.memberIds = srcGroup.memberIds.filter(x => x !== id);
-  }
+  if (from === 'pool') { poolIds = poolIds.filter(x => x !== id); }
+  else { const sg = groups.find(g => g.id === from); if (sg) sg.memberIds = sg.memberIds.filter(x => x !== id); }
 
   // Add to target
-  if (to === 'pool') {
-    poolIds.push(id);
-  } else {
-    const tgtGroup = groups.find(g => g.id === to);
-    if (tgtGroup) tgtGroup.memberIds.push(id);
-  }
+  if (to === 'pool') { poolIds.push(id); }
+  else { const tg = groups.find(g => g.id === to); if (tg) tg.memberIds.push(id); }
 
   renderDraw();
 }
 
-// ════════════════════════════════════
-//  OUTPUT
-// ════════════════════════════════════
+// ═══════════════════════════════════════
+//   OUTPUT
+// ═══════════════════════════════════════
 function generateOutput() {
-  if (!groups.length) { showToast('조편성을 먼저 시작하세요'); return; }
+  if (!groups.length) { toast('조편성을 먼저 하세요'); return; }
 
-  let submitLines = [];
-  let manageLines = [];
-
-  const dateStr = new Date().toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric', weekday:'short' });
-  submitLines.push(`📅 ${dateStr}\n`);
-  manageLines.push(`📅 ${dateStr}\n`);
+  const date = new Date().toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric', weekday:'short' });
+  let sub = `📅 ${date}\n\n`;
+  let mgr = `📅 ${date}\n\n`;
 
   groups.forEach(g => {
     const tee = g.teeTime ? ` (티타임 ${g.teeTime})` : '';
-    submitLines.push(`▶ ${g.label}${tee}`);
-    manageLines.push(`▶ ${g.label}${tee}`);
-
-    if (!g.memberIds.length) {
-      submitLines.push('  (없음)');
-      manageLines.push('  (없음)');
-    } else {
-      g.memberIds.forEach((id, i) => {
-        const m = members.find(x => x.id === id);
-        if (!m) return;
-        const star = m.gender === 'female' ? '*' : '';
-        submitLines.push(`  ${i+1}. ${m.name}${star}(${m.phone})`);
-        manageLines.push(`  ${i+1}. ${m.nickname} ${m.name}${star} H${m.handy||0} [${m.gender==='female'?'여':'남'}]`);
-      });
-    }
-    submitLines.push('');
-    manageLines.push('');
+    sub += `▶ ${g.label}${tee}\n`;
+    mgr += `▶ ${g.label}${tee}\n`;
+    if (!g.memberIds.length) { sub += '  (없음)\n'; mgr += '  (없음)\n'; }
+    else g.memberIds.forEach((id, i) => {
+      const m = members.find(x => x.id === id); if (!m) return;
+      const star = m.gender === 'female' ? '*' : '';
+      sub += `  ${i+1}. ${m.name}${star}(${m.phone})\n`;
+      mgr += `  ${i+1}. ${m.nickname||m.name} ${m.name}${star} H${m.handy||0} [${m.gender==='female'?'여':'남'}]\n`;
+    });
+    sub += '\n'; mgr += '\n';
   });
 
   if (poolIds.length) {
-    submitLines.push(`⚠️ 미배정: ${poolIds.map(id => members.find(x=>x.id===id)?.name||'?').join(', ')}`);
-    manageLines.push(`⚠️ 미배정: ${poolIds.map(id => members.find(x=>x.id===id)?.name||'?').join(', ')}`);
+    const names = poolIds.map(id => members.find(x=>x.id===id)?.name||'?').join(', ');
+    sub += `⚠️ 미배정: ${names}`;
+    mgr += `⚠️ 미배정: ${names}`;
   }
 
-  document.getElementById('submit-output').textContent = submitLines.join('\n');
-  document.getElementById('manage-output').textContent = manageLines.join('\n');
-  switchTab('result');
-  showToast('결과가 생성되었습니다');
+  document.getElementById('submit-output').textContent = sub;
+  document.getElementById('manage-output').textContent = mgr;
 }
 
-function copySubmitOutput() {
-  const text = document.getElementById('submit-output').textContent;
-  if (text === '조편성 결과가 여기에 표시됩니다.') { showToast('먼저 결과를 생성하세요'); return; }
-  navigator.clipboard.writeText(text).then(() => showToast('제출용 복사 완료 📋'));
-}
-
-function copyManageOutput() {
-  const text = document.getElementById('manage-output').textContent;
-  if (text === '조편성 결과가 여기에 표시됩니다.') { showToast('먼저 결과를 생성하세요'); return; }
-  navigator.clipboard.writeText(text).then(() => showToast('관리용 복사 완료 📋'));
+function copyOutput(type) {
+  const id = type === 'submit' ? 'submit-output' : 'manage-output';
+  const text = document.getElementById(id).textContent;
+  if (text.includes('조편성 후')) { toast('먼저 결과를 생성하세요'); return; }
+  navigator.clipboard.writeText(text).then(() => toast('복사 완료 📋'));
 }
 
 function saveResult() {
-  const submit = document.getElementById('submit-output').textContent;
-  const manage = document.getElementById('manage-output').textContent;
-  if (submit === '조편성 결과가 여기에 표시됩니다.') { showToast('먼저 결과를 생성하세요'); return; }
-
+  const sub = document.getElementById('submit-output').textContent;
+  if (sub.includes('조편성 후')) { toast('먼저 결과를 생성하세요'); return; }
   const data = {
     date: new Date().toISOString(),
     groups: groups.map(g => ({
-      label: g.label,
-      teeTime: g.teeTime,
-      members: g.memberIds.map(id => members.find(x => x.id === id)).filter(Boolean)
+      label: g.label, teeTime: g.teeTime,
+      members: g.memberIds.map(id => members.find(x=>x.id===id)).filter(Boolean)
     })),
-    submitOutput: submit,
-    manageOutput: manage
+    submitOutput: sub,
+    manageOutput: document.getElementById('manage-output').textContent
   };
+  dl(JSON.stringify(data, null, 2), `골프조편성_${new Date().toLocaleDateString('ko-KR').replace(/\.\s*/g,'').replace(/ /g,'')}.json`);
+  toast('저장 완료 💾');
+}
 
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+// ═══════════════════════════════════════
+//   UTILS
+// ═══════════════════════════════════════
+function uid() { return Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4); }
+function fmtPhone(p) {
+  const d = p.replace(/\D/g,'');
+  if (d.length === 11) return d.replace(/(\d{3})(\d{4})(\d{4})/,'$1-$2-$3');
+  if (d.length === 10) return d.replace(/(\d{3})(\d{3})(\d{4})/,'$1-$2-$3');
+  return p;
+}
+function dl(text, name) {
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `골프조편성_${new Date().toLocaleDateString('ko-KR').replace(/\./g,'').replace(/ /g,'')}.json`;
-  a.click();
-  showToast('저장 완료 💾');
+  a.href = URL.createObjectURL(new Blob([text], { type:'application/json' }));
+  a.download = name; a.click();
 }
-
-// ════════════════════════════════════
-//  UTILS
-// ════════════════════════════════════
-function uid() {
-  return Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
-}
-
-function showToast(msg) {
+function toast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-// Close modal on overlay click
-document.getElementById('member-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
+// Tap outside modals to close
+document.getElementById('member-modal').addEventListener('click', function(e) { if(e.target===this) closeModal('member-modal'); });
+document.getElementById('pick-modal').addEventListener('click', function(e) { if(e.target===this) closeModal('pick-modal'); });
 
-// ── Init ──
+// Init
 renderMembers();
 </script>
 
-<!-- Service Worker Registration -->
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {
-      navigator.serviceWorker.register('./sw.js');
-    });
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
   });
 }
 </script>
