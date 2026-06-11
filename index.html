@@ -15,512 +15,314 @@
 
     :root {
       --green-dark: #1a472a;
-      --green-mid: #2d6a4f;
-      --green-light: #52b788;
+      --green-mid:  #2d6a4f;
+      --green-light:#52b788;
       --green-pale: #d8f3dc;
-      --gold: #c9a84c;
+      --gold:       #c9a84c;
       --gold-light: #f0d080;
-      --bg: #eef2ea;
-      --surface: #ffffff;
-      --text: #1a2318;
-      --text-muted: #6b7c6b;
-      --border: #cdd8c8;
-      --danger: #c0392b;
-      --shadow: 0 2px 10px rgba(26,71,42,0.10);
-      --header-h: 96px;
+      --bg:         #eef2ea;
+      --surface:    #ffffff;
+      --text:       #1a2318;
+      --muted:      #6b7c6b;
+      --border:     #cdd8c8;
+      --danger:     #c0392b;
+      --shadow:     0 2px 10px rgba(26,71,42,0.10);
+      --hh: 96px; /* header height */
     }
 
-    html, body { height: 100%; }
-
+    html, body { height: 100%; overflow: hidden; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      overflow: hidden;
-      height: 100vh;
+      background: var(--bg); color: var(--text);
     }
 
-    /* ══ HEADER ══ */
+    /* ── Header ── */
     header {
-      background: var(--green-dark);
-      color: #fff;
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 200;
+      position: fixed; top:0; left:0; right:0; z-index:200;
+      background: var(--green-dark); color:#fff;
     }
-    .header-top {
-      padding: 12px 16px 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .header-top h1 { font-size: 19px; font-weight: 700; letter-spacing: -0.3px; }
-    .tab-bar {
-      display: flex;
-      border-top: 1px solid rgba(255,255,255,0.12);
-    }
+    .hd-top { padding:12px 16px 8px; display:flex; align-items:center; }
+    .hd-top h1 { font-size:19px; font-weight:700; }
+    .tab-bar { display:flex; border-top:1px solid rgba(255,255,255,.12); }
     .tab-btn {
-      flex: 1; padding: 8px 4px 7px;
-      background: none; border: none;
-      color: rgba(255,255,255,0.5);
-      font-size: 11px; cursor: pointer;
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
-      transition: color 0.15s;
+      flex:1; padding:8px 4px 7px; background:none; border:none;
+      color:rgba(255,255,255,.45); font-size:11px; cursor:pointer;
+      display:flex; flex-direction:column; align-items:center; gap:2px;
     }
-    .tab-btn .ic { font-size: 18px; }
-    .tab-btn.active { color: var(--gold-light); }
+    .tab-btn .ic { font-size:18px; }
+    .tab-btn.active { color:var(--gold-light); }
 
-    /* ══ MAIN ══ */
-    .main {
-      position: fixed;
-      top: var(--header-h);
-      left: 0; right: 0; bottom: 0;
-      overflow: hidden;
-    }
+    /* ── Layout ── */
+    .main { position:fixed; top:var(--hh); left:0; right:0; bottom:0; overflow:hidden; }
+    .panel { display:none; height:100%; flex-direction:column; overflow:hidden; }
+    .panel.active { display:flex; }
 
-    /* ══ PANELS ══ */
-    .panel { display: none; height: 100%; overflow: hidden; }
-    .panel.active { display: flex; flex-direction: column; }
-
-    /* ────── MEMBERS PANEL ────── */
-    #panel-members {
-      flex-direction: column;
-    }
-    .members-toolbar {
-      padding: 10px 12px;
-      display: flex;
-      gap: 7px;
-      flex-wrap: wrap;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    #member-scroll {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 10px 12px 20px;
+    /* ── Common toolbar ── */
+    .toolbar {
+      flex-shrink:0; padding:8px 10px;
+      display:flex; gap:6px; flex-wrap:wrap; align-items:center;
+      background:var(--surface); border-bottom:1px solid var(--border);
     }
 
-    /* ────── DRAW PANEL — SPLIT ────── */
-    #panel-draw {
-      flex-direction: column;
-    }
-    .draw-toolbar {
-      padding: 8px 12px;
-      display: flex;
-      gap: 7px;
-      align-items: center;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-      flex-wrap: wrap;
-    }
-    .draw-split {
-      flex: 1;
-      display: flex;
-      overflow: hidden;
-    }
+    /* ══════════ MEMBERS PANEL ══════════ */
+    #panel-members .scroll { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:10px; }
 
-    /* LEFT — member pool */
-    .split-left {
-      width: 42%;
-      border-right: 2px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      background: var(--surface);
-      overflow: hidden;
-    }
-    .split-left-header {
-      background: var(--green-mid);
-      color: #fff;
-      padding: 7px 10px;
-      font-size: 12px;
-      font-weight: 700;
-      text-align: center;
-      flex-shrink: 0;
-    }
-    .pool-scroll {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 6px;
-    }
-
-    /* RIGHT — groups */
-    .split-right {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .groups-scroll {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 8px;
-    }
-
-    /* ── Pool member row ── */
-    .pool-row {
-      display: flex;
-      align-items: center;
-      padding: 7px 8px;
-      border-radius: 8px;
-      margin-bottom: 5px;
-      background: var(--bg);
-      border: 1.5px solid var(--border);
-      cursor: grab;
-      touch-action: none;
-      user-select: none;
-      gap: 6px;
-      transition: background 0.15s, border-color 0.15s;
-    }
-    .pool-row.female { border-color: #f9a8d4; background: #fff0f6; }
-    .pool-row.dragging { opacity: 0.3; }
-    .pool-row.drag-placeholder {
-      border: 2px dashed var(--green-light);
-      background: var(--green-pale);
-      opacity: 0.6;
-    }
-    .pool-row:active { background: var(--green-pale); }
-    .pool-row .pr-name { font-size: 13px; font-weight: 700; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .pool-row .pr-sub  { font-size: 10px; color: var(--text-muted); }
-    .pool-row .pr-add  {
-      width: 26px; height: 26px;
-      border-radius: 50%;
-      border: none;
-      background: var(--green-mid);
-      color: #fff;
-      font-size: 16px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      flex-shrink: 0;
-      line-height: 1;
-    }
-
-    /* ── Group card ── */
-    .group-card {
-      background: var(--surface);
-      border-radius: 10px;
-      box-shadow: var(--shadow);
-      margin-bottom: 8px;
-      overflow: hidden;
-      border: 2px solid transparent;
-      transition: border-color 0.15s;
-    }
-    .group-card.drag-over { border-color: var(--green-light); background: var(--green-pale); }
-    .group-card.selected-target { border-color: var(--gold); }
-    .group-head {
-      background: var(--green-dark);
-      color: #fff;
-      padding: 7px 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .group-head h3 { font-size: 13px; font-weight: 700; flex: 1; }
-    .tee-input {
-      padding: 4px 7px;
-      border-radius: 5px;
-      border: none;
-      background: rgba(255,255,255,0.18);
-      color: #fff;
-      font-size: 12px;
-      width: 82px;
-    }
-    .tee-input::placeholder { color: rgba(255,255,255,0.45); }
-    .g-count {
-      font-size: 11px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 10px;
-      padding: 2px 7px;
-      min-width: 30px;
-      text-align: center;
-    }
-    .g-count.full { background: var(--gold); color: #1a2318; font-weight: 700; }
-    .group-body {
-      padding: 7px 8px;
-      min-height: 52px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .empty-hint { font-size: 12px; color: var(--text-muted); padding: 8px 0; text-align: center; font-style: italic; }
-
-    /* member row inside group */
-    .gm-row {
-      display: flex;
-      align-items: center;
-      padding: 5px 8px;
-      border-radius: 6px;
-      background: var(--bg);
-      border: 1.5px solid var(--border);
-      gap: 6px;
-      cursor: grab;
-      touch-action: none;
-      user-select: none;
-    }
-    .gm-row.female { border-color: #f9a8d4; background: #fff0f6; }
-    .gm-row.dragging { opacity: 0.3; }
-    .gm-row .gm-name { font-size: 12px; font-weight: 700; flex: 1; }
-    .gm-row .gm-sub  { font-size: 10px; color: var(--text-muted); }
-    .gm-row .gm-rm   {
-      width: 22px; height: 22px;
-      border-radius: 50%;
-      border: none;
-      background: #fee2e2;
-      color: var(--danger);
-      font-size: 13px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    /* ── Add-to-group modal ── */
-    /* This modal pops up when you tap the + button: shows group list to pick */
-    .pick-modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 500;
-      align-items: flex-end;
-      justify-content: center;
-    }
-    .pick-modal.open { display: flex; }
-    .pick-sheet {
-      background: var(--surface);
-      border-radius: 18px 18px 0 0;
-      width: 100%;
-      max-width: 480px;
-      padding: 20px 16px 34px;
-      animation: slideUp 0.22s ease;
-      max-height: 70vh;
-      overflow-y: auto;
-    }
-    @keyframes slideUp {
-      from { transform: translateY(50px); opacity: 0; }
-      to   { transform: translateY(0);    opacity: 1; }
-    }
-    .pick-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-    .pick-sub   { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
-    .pick-group-btn {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: 1.5px solid var(--border);
-      background: var(--bg);
-      margin-bottom: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      text-align: left;
-    }
-    .pick-group-btn:active { background: var(--green-pale); border-color: var(--green-light); }
-    .pick-group-btn .pgb-right { font-size: 12px; color: var(--text-muted); font-weight: 400; }
-    .pick-group-btn.disabled { opacity: 0.4; pointer-events: none; }
-    .pick-cancel {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      background: #f3f4f6;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 4px;
-    }
-
-    /* ── RESULT PANEL ── */
-    #panel-result {
-      flex-direction: column;
-    }
-    .result-toolbar {
-      padding: 10px 12px;
-      display: flex;
-      gap: 7px;
-      flex-wrap: wrap;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    .result-scroll {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 12px;
-    }
-    .output-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .output-box {
-      background: #1a2318;
-      color: #d8f3dc;
-      border-radius: 10px;
-      padding: 14px;
-      font-size: 13px;
-      line-height: 2;
-      white-space: pre-wrap;
-      font-family: 'Courier New', monospace;
-      margin-bottom: 14px;
-    }
-
-    /* ── MEMBER MODAL ── */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.45); z-index: 400;
-      align-items: flex-end; justify-content: center;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal-sheet {
-      background: var(--surface);
-      border-radius: 18px 18px 0 0;
-      width: 100%; max-width: 480px;
-      padding: 22px 18px 32px;
-      animation: slideUp 0.22s ease;
-    }
-    .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 18px; }
-    .form-group { margin-bottom: 12px; }
-    .form-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; display: block; }
-    .form-input {
-      width: 100%; padding: 10px 12px;
-      border: 1.5px solid var(--border); border-radius: 8px;
-      font-size: 15px; background: var(--bg); color: var(--text);
-      outline: none;
-    }
-    .form-input:focus { border-color: var(--green-light); }
-    .radio-group { display: flex; gap: 8px; }
-    .radio-btn {
-      flex: 1; padding: 9px; border: 1.5px solid var(--border);
-      border-radius: 8px; text-align: center; cursor: pointer;
-      font-size: 14px; font-weight: 600;
-    }
-    .radio-btn.selected { border-color: var(--green-mid); background: var(--green-pale); color: var(--green-dark); }
-
-    /* ── Shared Buttons ── */
-    .btn {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 8px 13px; border-radius: 8px; border: none;
-      font-size: 13px; font-weight: 600; cursor: pointer;
-      white-space: nowrap;
-    }
-    .btn:active { opacity: 0.8; transform: scale(0.97); }
-    .btn-primary { background: var(--green-mid); color: #fff; }
-    .btn-gold    { background: var(--gold); color: #1a2318; }
-    .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
-    .btn-danger  { background: var(--danger); color: #fff; }
-    .btn-sm { padding: 6px 10px; font-size: 12px; }
-
-    /* ── Ghost ── */
-    #drag-ghost {
-      position: fixed; pointer-events: none; z-index: 9999;
-      opacity: 0.9; transform: rotate(3deg) scale(1.05);
-      display: none; max-width: 160px;
-    }
-
-    /* ── Member list item ── */
     .member-item {
-      display: flex; align-items: center;
-      padding: 10px 12px;
-      background: var(--surface); border-radius: 10px;
-      margin-bottom: 7px;
-      box-shadow: 0 1px 4px rgba(26,71,42,0.07);
-      gap: 9px;
+      display:flex; align-items:center; gap:8px;
+      padding:10px 12px; margin-bottom:7px;
+      background:var(--surface); border-radius:10px;
+      box-shadow:0 1px 4px rgba(26,71,42,.07);
     }
-    .avatar {
-      width: 36px; height: 36px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px; flex-shrink: 0;
+    .avatar { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+    .avatar.m { background:#dbeafe; } .avatar.f { background:#fce7f3; }
+    .mi-info { flex:1; min-width:0; }
+    .mi-name { font-weight:700; font-size:14px; }
+    .mi-sub  { font-size:11px; color:var(--muted); margin-top:1px; }
+    .mi-acts { display:flex; gap:4px; }
+    .badge { font-size:10px; padding:1px 5px; border-radius:10px; font-weight:700; margin-left:3px; }
+    .bm { background:#dbeafe; color:#1e40af; }
+    .bf { background:#fce7f3; color:#9d174d; }
+    .bh { background:var(--green-pale); color:var(--green-dark); }
+
+    /* ══════════ DRAW PANEL ══════════ */
+    .draw-split { flex:1; display:flex; overflow:hidden; }
+
+    /* LEFT — scrollable, NO drag */
+    .split-left {
+      width:42%; border-right:2px solid var(--border);
+      display:flex; flex-direction:column; background:var(--surface); overflow:hidden;
     }
-    .avatar.male   { background: #dbeafe; }
-    .avatar.female { background: #fce7f3; }
-    .mi-info { flex: 1; min-width: 0; }
-    .mi-name { font-weight: 700; font-size: 14px; }
-    .mi-sub  { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
-    .mi-acts { display: flex; gap: 5px; }
-    .btn-xs { padding: 4px 8px; font-size: 11px; border-radius: 6px; }
-    .badge { font-size: 10px; padding: 1px 5px; border-radius: 10px; font-weight: 700; margin-left: 4px; }
-    .badge-m { background: #dbeafe; color: #1e40af; }
-    .badge-f { background: #fce7f3; color: #9d174d; }
-    .badge-h { background: var(--green-pale); color: var(--green-dark); }
+    .sl-head {
+      flex-shrink:0; background:var(--green-mid); color:#fff;
+      padding:6px 10px; font-size:12px; font-weight:700; text-align:center;
+    }
+    /* ★ touch-action:pan-y → native scroll, no interference */
+    .sl-scroll {
+      flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;
+      padding:6px; touch-action:pan-y;
+    }
 
-    .empty-state { text-align: center; padding: 36px 20px; color: var(--text-muted); }
-    .empty-state .ei { font-size: 36px; margin-bottom: 8px; }
+    /* Pool row — TAP only, no drag */
+    .pool-row {
+      display:flex; align-items:center; gap:6px;
+      padding:7px 8px; margin-bottom:5px;
+      background:var(--bg); border:1.5px solid var(--border); border-radius:8px;
+    }
+    .pool-row.female { border-color:#f9a8d4; background:#fff0f6; }
+    .pr-info { flex:1; min-width:0; }
+    .pr-name { font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .pr-sub  { font-size:10px; color:var(--muted); }
+    /* Big tap target + button */
+    .pr-add {
+      width:32px; height:32px; border-radius:50%; border:none;
+      background:var(--green-mid); color:#fff;
+      font-size:20px; line-height:1; display:flex; align-items:center; justify-content:center;
+      cursor:pointer; flex-shrink:0;
+      /* make tap feel snappy */
+      transition: transform .1s, background .1s;
+    }
+    .pr-add:active { transform:scale(.88); background:var(--green-dark); }
 
-    /* ── Toast ── */
+    /* RIGHT — groups, drag allowed here */
+    .split-right { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+    .sr-scroll { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:8px; }
+
+    /* Group card */
+    .group-card {
+      background:var(--surface); border-radius:10px;
+      box-shadow:var(--shadow); margin-bottom:8px; overflow:hidden;
+      border:2px solid transparent; transition:border-color .15s, background .15s;
+    }
+    .group-card.drop-active { border-color:var(--green-light); background:var(--green-pale); }
+    .g-head {
+      background:var(--green-dark); color:#fff;
+      padding:7px 10px; display:flex; align-items:center; gap:8px;
+    }
+    .g-head h3 { font-size:13px; font-weight:700; flex:1; }
+    .tee-input {
+      padding:4px 7px; border-radius:5px; border:none;
+      background:rgba(255,255,255,.18); color:#fff; font-size:12px; width:82px;
+    }
+    .tee-input::placeholder { color:rgba(255,255,255,.4); }
+    .g-cnt {
+      font-size:11px; background:rgba(255,255,255,.2);
+      border-radius:10px; padding:2px 7px; min-width:30px; text-align:center;
+    }
+    .g-cnt.full { background:var(--gold); color:#1a2318; font-weight:700; }
+    .g-body { padding:7px 8px; min-height:52px; display:flex; flex-direction:column; gap:4px; }
+    .g-empty { font-size:12px; color:var(--muted); padding:8px 0; text-align:center; font-style:italic; }
+
+    /* Member row inside group */
+    /* Long-press to drag between groups */
+    .gm-row {
+      display:flex; align-items:center; gap:6px;
+      padding:6px 8px; border-radius:7px;
+      background:var(--bg); border:1.5px solid var(--border);
+      user-select:none;
+      transition: box-shadow .15s, opacity .15s;
+      cursor:default;
+    }
+    .gm-row.female { border-color:#f9a8d4; background:#fff0f6; }
+    /* visual cue: long-press activates drag */
+    .gm-row.pressing { box-shadow:0 4px 14px rgba(26,71,42,.22); transform:scale(1.03); }
+    .gm-row.dragging { opacity:.3; }
+    .gm-name { font-size:12px; font-weight:700; flex:1; }
+    .gm-sub  { font-size:10px; color:var(--muted); }
+    .gm-rm {
+      width:22px; height:22px; border-radius:50%; border:none;
+      background:#fee2e2; color:var(--danger); font-size:13px;
+      display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+    }
+
+    /* Drag ghost */
+    #drag-ghost {
+      position:fixed; pointer-events:none; z-index:9999;
+      opacity:.9; transform:rotate(3deg) scale(1.06);
+      display:none; max-width:160px; min-width:100px;
+      background:var(--surface); border:1.5px solid var(--green-light);
+      border-radius:8px; padding:6px 10px;
+      font-size:13px; font-weight:700;
+      box-shadow:0 6px 20px rgba(0,0,0,.2);
+    }
+
+    /* ══════════ PICK MODAL ══════════ */
+    .modal-bg {
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,.48); z-index:500;
+      align-items:flex-end; justify-content:center;
+    }
+    .modal-bg.open { display:flex; }
+    .sheet {
+      background:var(--surface); border-radius:18px 18px 0 0;
+      width:100%; max-width:480px;
+      padding:20px 16px 36px;
+      max-height:72vh; overflow-y:auto;
+      animation: su .22s ease;
+    }
+    @keyframes su { from{transform:translateY(50px);opacity:0} to{transform:translateY(0);opacity:1} }
+    .sheet-title { font-size:16px; font-weight:700; margin-bottom:3px; }
+    .sheet-sub   { font-size:13px; color:var(--muted); margin-bottom:14px; }
+    .pg-btn {
+      display:flex; align-items:center; justify-content:space-between;
+      width:100%; padding:13px 14px; margin-bottom:8px;
+      border-radius:10px; border:1.5px solid var(--border);
+      background:var(--bg); font-size:14px; font-weight:600; cursor:pointer; text-align:left;
+    }
+    .pg-btn:active { background:var(--green-pale); border-color:var(--green-light); }
+    .pg-btn.disabled { opacity:.38; pointer-events:none; }
+    .pg-right { font-size:12px; color:var(--muted); font-weight:400; }
+    .sheet-cancel {
+      width:100%; padding:13px; border-radius:10px; border:none;
+      background:#f3f4f6; font-size:14px; font-weight:600; cursor:pointer; margin-top:4px;
+    }
+
+    /* ══════════ MEMBER MODAL ══════════ */
+    .form-group { margin-bottom:12px; }
+    .form-label { font-size:12px; font-weight:700; color:var(--muted); margin-bottom:4px; display:block; }
+    .form-input {
+      width:100%; padding:10px 12px;
+      border:1.5px solid var(--border); border-radius:8px;
+      font-size:15px; background:var(--bg); color:var(--text); outline:none;
+    }
+    .form-input:focus { border-color:var(--green-light); }
+    .radio-group { display:flex; gap:8px; }
+    .radio-btn {
+      flex:1; padding:9px; border:1.5px solid var(--border);
+      border-radius:8px; text-align:center; cursor:pointer; font-size:14px; font-weight:600;
+    }
+    .radio-btn.sel { border-color:var(--green-mid); background:var(--green-pale); color:var(--green-dark); }
+
+    /* ══════════ RESULT PANEL ══════════ */
+    #panel-result .scroll { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:12px; }
+    .out-label { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; }
+    .out-box {
+      background:#1a2318; color:#d8f3dc; border-radius:10px;
+      padding:14px; font-size:13px; line-height:2;
+      white-space:pre-wrap; font-family:'Courier New',monospace; margin-bottom:14px;
+    }
+
+    /* ══════════ Shared ══════════ */
+    .btn {
+      display:inline-flex; align-items:center; gap:5px;
+      padding:7px 12px; border-radius:8px; border:none;
+      font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;
+    }
+    .btn:active { opacity:.8; transform:scale(.97); }
+    .btn-p { background:var(--green-mid); color:#fff; }
+    .btn-g { background:var(--gold); color:#1a2318; }
+    .btn-o { background:transparent; border:1.5px solid var(--border); color:var(--text); }
+    .btn-d { background:var(--danger); color:#fff; }
+    .btn-sm { padding:5px 9px; font-size:12px; }
+    .btn-xs { padding:4px 7px; font-size:11px; border-radius:6px; }
+
+    .empty-state { text-align:center; padding:32px 16px; color:var(--muted); }
+    .empty-state .ei { font-size:34px; margin-bottom:8px; }
+
     .toast {
-      position: fixed; bottom: 24px; left: 50%;
-      transform: translateX(-50%) translateY(10px);
-      background: #1a2318; color: #fff;
-      padding: 9px 18px; border-radius: 20px;
-      font-size: 13px; z-index: 9999; opacity: 0;
-      transition: all 0.25s; pointer-events: none; white-space: nowrap;
+      position:fixed; bottom:22px; left:50%;
+      transform:translateX(-50%) translateY(8px);
+      background:#1a2318; color:#fff;
+      padding:9px 18px; border-radius:20px;
+      font-size:13px; z-index:9999; opacity:0;
+      transition:all .25s; pointer-events:none; white-space:nowrap;
     }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    /* Long-press hint label */
+    .lp-hint {
+      font-size:10px; color:var(--muted); text-align:center;
+      padding:4px 0 2px; font-style:italic;
+    }
   </style>
 </head>
 <body>
 
-<!-- ══════════ HEADER ══════════ -->
+<!-- ══ HEADER ══ -->
 <header>
-  <div class="header-top">
-    <h1>⛳ 골프 조편성</h1>
-  </div>
+  <div class="hd-top"><h1>⛳ 골프 조편성</h1></div>
   <div class="tab-bar">
-    <button class="tab-btn active" id="tab-members" onclick="switchTab('members')">
-      <span class="ic">👥</span>회원 명단
-    </button>
-    <button class="tab-btn" id="tab-draw" onclick="switchTab('draw')">
-      <span class="ic">🏌️</span>조편성
-    </button>
-    <button class="tab-btn" id="tab-result" onclick="switchTab('result')">
-      <span class="ic">📋</span>결과
-    </button>
+    <button class="tab-btn active" id="tab-members" onclick="switchTab('members')"><span class="ic">👥</span>회원 명단</button>
+    <button class="tab-btn"        id="tab-draw"    onclick="switchTab('draw')">   <span class="ic">🏌️</span>조편성</button>
+    <button class="tab-btn"        id="tab-result"  onclick="switchTab('result')"> <span class="ic">📋</span>결과</button>
   </div>
 </header>
 
 <div class="main">
 
-  <!-- ══════════ MEMBERS PANEL ══════════ -->
+  <!-- ══ MEMBERS ══ -->
   <div class="panel active" id="panel-members">
-    <div class="members-toolbar">
-      <button class="btn btn-primary" onclick="openMemberModal()">➕ 회원 추가</button>
-      <button class="btn btn-outline btn-sm" onclick="exportMembers()">💾 내보내기</button>
-      <label class="btn btn-outline btn-sm" style="cursor:pointer;">
-        📂 불러오기
-        <input type="file" accept=".json" onchange="importMembers(event)" style="display:none" />
-      </label>
+    <div class="toolbar">
+      <button class="btn btn-p" onclick="openMemberModal()">➕ 회원 추가</button>
+      <button class="btn btn-o btn-sm" onclick="exportMembers()">💾 내보내기</button>
+      <label  class="btn btn-o btn-sm" style="cursor:pointer;">📂 불러오기<input type="file" accept=".json" onchange="importMembers(event)" style="display:none"/></label>
     </div>
-    <div id="member-scroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px 20px;">
+    <div class="scroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px;">
       <div id="member-list"></div>
     </div>
   </div>
 
-  <!-- ══════════ DRAW PANEL ══════════ -->
+  <!-- ══ DRAW ══ -->
   <div class="panel" id="panel-draw">
-    <div class="draw-toolbar">
-      <button class="btn btn-gold" onclick="initDraw()">🔄 조편성 시작</button>
-      <button class="btn btn-primary btn-sm" onclick="addGroup()">➕ 조 추가</button>
-      <button class="btn btn-outline btn-sm" onclick="removeLastGroup()">➖ 조 삭제</button>
-      <button class="btn btn-outline btn-sm" onclick="generateOutput(); switchTab('result')">📊 결과보기</button>
+    <div class="toolbar">
+      <button class="btn btn-g"    onclick="initDraw()">🔄 조편성 시작</button>
+      <button class="btn btn-p btn-sm" onclick="addGroup()">➕ 조 추가</button>
+      <button class="btn btn-o btn-sm" onclick="removeLastGroup()">➖ 조 삭제</button>
+      <button class="btn btn-o btn-sm" onclick="generateOutput();switchTab('result')">📊 결과보기</button>
     </div>
     <div class="draw-split">
 
-      <!-- LEFT: pool -->
+      <!-- LEFT: pool — scrollable, no drag -->
       <div class="split-left">
-        <div class="split-left-header">
-          👥 대기 회원 <span id="pool-count"></span>
-        </div>
-        <div class="pool-scroll" id="pool-scroll">
+        <div class="sl-head">👥 대기 <span id="pool-count"></span></div>
+        <!-- touch-action:pan-y set on .sl-scroll via CSS — free vertical scroll -->
+        <div class="sl-scroll" id="pool-scroll">
           <div id="pool-list"></div>
         </div>
       </div>
 
-      <!-- RIGHT: groups -->
+      <!-- RIGHT: groups — drag allowed -->
       <div class="split-right">
-        <div class="groups-scroll" id="groups-scroll">
+        <div class="sr-scroll" id="sr-scroll">
           <div id="groups-container"></div>
         </div>
       </div>
@@ -528,178 +330,161 @@
     </div>
   </div>
 
-  <!-- ══════════ RESULT PANEL ══════════ -->
+  <!-- ══ RESULT ══ -->
   <div class="panel" id="panel-result">
-    <div class="result-toolbar">
-      <button class="btn btn-primary" onclick="generateOutput()">🔄 새로고침</button>
-      <button class="btn btn-outline btn-sm" onclick="copyOutput('submit')">📋 제출용 복사</button>
-      <button class="btn btn-outline btn-sm" onclick="copyOutput('manage')">📋 관리용 복사</button>
-      <button class="btn btn-gold btn-sm" onclick="saveResult()">💾 저장</button>
+    <div class="toolbar">
+      <button class="btn btn-p"    onclick="generateOutput()">🔄 새로고침</button>
+      <button class="btn btn-o btn-sm" onclick="copyOut('submit')">📋 제출용 복사</button>
+      <button class="btn btn-o btn-sm" onclick="copyOut('manage')">📋 관리용 복사</button>
+      <button class="btn btn-g btn-sm" onclick="saveResult()">💾 저장</button>
     </div>
-    <div class="result-scroll">
-      <div class="output-label">📤 제출용 (이름 + 전화번호)</div>
-      <div class="output-box" id="submit-output">조편성 후 결과보기를 눌러주세요.</div>
-      <div class="output-label">🗂 관리용 (닉네임 · 핸디 · 성별)</div>
-      <div class="output-box" id="manage-output">조편성 후 결과보기를 눌러주세요.</div>
+    <div class="scroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px;">
+      <div class="out-label">📤 제출용 (이름 + 전화번호)</div>
+      <div class="out-box" id="submit-output">조편성 후 결과보기를 눌러주세요.</div>
+      <div class="out-label">🗂 관리용 (닉네임 · 핸디 · 성별)</div>
+      <div class="out-box" id="manage-output">조편성 후 결과보기를 눌러주세요.</div>
     </div>
   </div>
 
-</div><!-- /main -->
+</div>
 
-<!-- ══════════ MEMBER EDIT MODAL ══════════ -->
-<div class="modal-overlay" id="member-modal">
-  <div class="modal-sheet">
-    <div class="modal-title" id="modal-title">회원 추가</div>
-    <div class="form-group">
-      <label class="form-label">닉네임</label>
-      <input class="form-input" id="f-nickname" placeholder="예: 이글보이" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">이름</label>
-      <input class="form-input" id="f-name" placeholder="예: 김삼용" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">전화번호</label>
-      <input class="form-input" id="f-phone" placeholder="010-0000-0000" type="tel" inputmode="tel" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">핸디</label>
-      <input class="form-input" id="f-handy" placeholder="예: 10" type="number" inputmode="numeric" />
-    </div>
+<!-- ══ MEMBER MODAL ══ -->
+<div class="modal-bg" id="m-modal">
+  <div class="sheet">
+    <div class="sheet-title" id="m-modal-title">회원 추가</div>
+    <div style="height:14px"></div>
+    <div class="form-group"><label class="form-label">닉네임</label><input class="form-input" id="f-nick" placeholder="예: 이글보이"/></div>
+    <div class="form-group"><label class="form-label">이름</label><input class="form-input" id="f-name" placeholder="예: 김삼용"/></div>
+    <div class="form-group"><label class="form-label">전화번호</label><input class="form-input" id="f-phone" type="tel" inputmode="tel" placeholder="010-0000-0000"/></div>
+    <div class="form-group"><label class="form-label">핸디</label><input class="form-input" id="f-handy" type="number" inputmode="numeric" placeholder="예: 10"/></div>
     <div class="form-group">
       <label class="form-label">성별</label>
       <div class="radio-group">
-        <div class="radio-btn selected" id="rb-male"   onclick="selectGender('male')">🏌️ 남성</div>
-        <div class="radio-btn"          id="rb-female" onclick="selectGender('female')">🏌️‍♀️ 여성</div>
+        <div class="radio-btn sel" id="rb-m" onclick="selGender('male')">🏌️ 남성</div>
+        <div class="radio-btn"     id="rb-f" onclick="selGender('female')">🏌️‍♀️ 여성</div>
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:10px;">
-      <button class="btn btn-primary" style="flex:1" onclick="saveMember()">저장</button>
-      <button class="btn btn-outline" style="flex:1" onclick="closeModal('member-modal')">취소</button>
+      <button class="btn btn-p" style="flex:1" onclick="saveMember()">저장</button>
+      <button class="btn btn-o" style="flex:1" onclick="closeModal('m-modal')">취소</button>
     </div>
   </div>
 </div>
 
-<!-- ══════════ PICK GROUP MODAL ══════════ -->
-<!-- Shown when tapping + on a pool member -->
-<div class="pick-modal" id="pick-modal">
-  <div class="pick-sheet">
-    <div class="pick-title" id="pick-title">조 선택</div>
-    <div class="pick-sub" id="pick-sub"></div>
-    <div id="pick-group-list"></div>
-    <button class="pick-cancel" onclick="closeModal('pick-modal')">취소</button>
+<!-- ══ PICK GROUP MODAL ══ -->
+<div class="modal-bg" id="pick-modal">
+  <div class="sheet">
+    <div class="sheet-title" id="pick-title">조 선택</div>
+    <div class="sheet-sub">배정할 조를 선택하세요</div>
+    <div id="pick-list"></div>
+    <button class="sheet-cancel" onclick="closeModal('pick-modal')">취소</button>
   </div>
 </div>
 
-<!-- Drag ghost -->
+<!-- Drag ghost (only used for group-to-group drag) -->
 <div id="drag-ghost"></div>
 <div class="toast" id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════
-//   STATE
-// ═══════════════════════════════════════
-let members = JSON.parse(localStorage.getItem('golf_members') || '[]');
-let groups  = [];   // [{id, label, teeTime, memberIds:[]}]
-let poolIds = [];   // member ids not in any group
+/* ═══════════════════════════════════
+   STATE
+═══════════════════════════════════ */
+let members  = JSON.parse(localStorage.getItem('golf_members') || '[]');
+let groups   = [];
+let poolIds  = [];
+let editId   = null;
+let selGnd   = 'male';
+let pickMid  = null;  // member id being placed via pick modal
 
-let editingId    = null;
-let selectedGender = 'male';
-let pickingMemberId = null;   // which member we're placing via the pick modal
-
-// drag state
+/* drag-between-groups state */
 let dragId   = null;
-let dragFrom = null; // 'pool' | group.id
+let dragFrom = null;  // group id
 
-// ═══════════════════════════════════════
-//   TABS
-// ═══════════════════════════════════════
+/* ═══════════════════════════════════
+   TABS
+═══════════════════════════════════ */
 function switchTab(t) {
   ['members','draw','result'].forEach(k => {
-    document.getElementById('panel-' + k).classList.toggle('active', k === t);
-    document.getElementById('tab-'   + k).classList.toggle('active', k === t);
+    document.getElementById('panel-'+k).classList.toggle('active', k===t);
+    document.getElementById('tab-'+k).classList.toggle('active', k===t);
   });
 }
 
-// ═══════════════════════════════════════
-//   PERSIST
-// ═══════════════════════════════════════
+/* ═══════════════════════════════════
+   MEMBERS
+═══════════════════════════════════ */
 function persist() { localStorage.setItem('golf_members', JSON.stringify(members)); }
 
-// ═══════════════════════════════════════
-//   MEMBERS
-// ═══════════════════════════════════════
 function renderMembers() {
   const el = document.getElementById('member-list');
   if (!members.length) {
-    el.innerHTML = `<div class="empty-state"><div class="ei">👥</div><p>등록된 회원이 없습니다</p></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="ei">👥</div><p>회원을 추가해주세요</p></div>`;
     return;
   }
   el.innerHTML = members.map(m => `
     <div class="member-item">
-      <div class="avatar ${m.gender === 'female' ? 'female':'male'}">${m.gender==='female'?'👩':'👨'}</div>
+      <div class="avatar ${m.gender==='female'?'f':'m'}">${m.gender==='female'?'👩':'👨'}</div>
       <div class="mi-info">
         <div class="mi-name">${m.name}${m.gender==='female'?'*':''}
-          <span class="badge ${m.gender==='female'?'badge-f':'badge-m'}">${m.gender==='female'?'여':'남'}</span>
-          <span class="badge badge-h">H${m.handy||0}</span>
+          <span class="badge ${m.gender==='female'?'bf':'bm'}">${m.gender==='female'?'여':'남'}</span>
+          <span class="badge bh">H${m.handy||0}</span>
         </div>
         <div class="mi-sub">${m.nickname||'-'} · ${m.phone}</div>
       </div>
       <div class="mi-acts">
-        <button class="btn btn-outline btn-xs btn-sm" onclick="openEditModal('${m.id}')">✏️</button>
-        <button class="btn btn-danger  btn-xs btn-sm" onclick="deleteMember('${m.id}')">🗑</button>
+        <button class="btn btn-o btn-xs" onclick="openEdit('${m.id}')">✏️</button>
+        <button class="btn btn-d btn-xs" onclick="delMember('${m.id}')">🗑</button>
       </div>
     </div>`).join('');
 }
 
 function openMemberModal() {
-  editingId = null;
-  document.getElementById('modal-title').textContent = '회원 추가';
-  ['f-nickname','f-name','f-phone','f-handy'].forEach(id => document.getElementById(id).value = '');
-  selectGender('male');
-  document.getElementById('member-modal').classList.add('open');
+  editId = null;
+  document.getElementById('m-modal-title').textContent = '회원 추가';
+  ['f-nick','f-name','f-phone','f-handy'].forEach(id => document.getElementById(id).value='');
+  selGender('male');
+  document.getElementById('m-modal').classList.add('open');
 }
-function openEditModal(id) {
-  const m = members.find(x => x.id === id); if (!m) return;
-  editingId = id;
-  document.getElementById('modal-title').textContent = '회원 수정';
-  document.getElementById('f-nickname').value = m.nickname || '';
-  document.getElementById('f-name').value     = m.name;
-  document.getElementById('f-phone').value    = m.phone;
-  document.getElementById('f-handy').value    = m.handy || '';
-  selectGender(m.gender);
-  document.getElementById('member-modal').classList.add('open');
+function openEdit(id) {
+  const m = members.find(x=>x.id===id); if (!m) return;
+  editId = id;
+  document.getElementById('m-modal-title').textContent = '회원 수정';
+  document.getElementById('f-nick').value  = m.nickname||'';
+  document.getElementById('f-name').value  = m.name;
+  document.getElementById('f-phone').value = m.phone;
+  document.getElementById('f-handy').value = m.handy||'';
+  selGender(m.gender);
+  document.getElementById('m-modal').classList.add('open');
 }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-function selectGender(g) {
-  selectedGender = g;
-  document.getElementById('rb-male').classList.toggle('selected', g==='male');
-  document.getElementById('rb-female').classList.toggle('selected', g==='female');
+function selGender(g) {
+  selGnd = g;
+  document.getElementById('rb-m').classList.toggle('sel', g==='male');
+  document.getElementById('rb-f').classList.toggle('sel', g==='female');
 }
 function saveMember() {
-  const nickname = document.getElementById('f-nickname').value.trim();
+  const nickname = document.getElementById('f-nick').value.trim();
   const name     = document.getElementById('f-name').value.trim();
   const phone    = fmtPhone(document.getElementById('f-phone').value.trim());
-  const handy    = parseInt(document.getElementById('f-handy').value) || 0;
+  const handy    = parseInt(document.getElementById('f-handy').value)||0;
   if (!name)  { toast('이름을 입력하세요'); return; }
   if (!phone) { toast('전화번호를 입력하세요'); return; }
-  if (editingId) {
-    const i = members.findIndex(x => x.id === editingId);
-    members[i] = { ...members[i], nickname, name, phone, handy, gender: selectedGender };
+  if (editId) {
+    const i = members.findIndex(x=>x.id===editId);
+    members[i] = {...members[i], nickname, name, phone, handy, gender:selGnd};
   } else {
-    members.push({ id: uid(), nickname, name, phone, handy, gender: selectedGender });
+    members.push({id:uid(), nickname, name, phone, handy, gender:selGnd});
   }
-  persist(); renderMembers(); closeModal('member-modal');
-  toast(editingId ? '수정되었습니다' : '회원 추가 완료');
+  persist(); renderMembers(); closeModal('m-modal');
+  toast(editId ? '수정 완료' : '회원 추가 완료');
 }
-function deleteMember(id) {
+function delMember(id) {
   if (!confirm('삭제하시겠습니까?')) return;
-  members = members.filter(m => m.id !== id);
+  members = members.filter(m=>m.id!==id);
   persist(); renderMembers(); toast('삭제되었습니다');
 }
 function exportMembers() {
-  dl(JSON.stringify(members, null, 2), '골프_회원명단.json');
-  toast('내보내기 완료');
+  dl(JSON.stringify(members,null,2),'골프_회원명단.json'); toast('내보내기 완료');
 }
 function importMembers(e) {
   const file = e.target.files[0]; if (!file) return;
@@ -707,395 +492,318 @@ function importMembers(e) {
   r.onload = ev => {
     try {
       const d = JSON.parse(ev.target.result);
-      if (Array.isArray(d)) { members = d; persist(); renderMembers(); toast(d.length + '명 불러오기 완료'); }
+      if (Array.isArray(d)) { members=d; persist(); renderMembers(); toast(d.length+'명 불러오기 완료'); }
     } catch { toast('파일 오류'); }
   };
-  r.readAsText(file); e.target.value = '';
+  r.readAsText(file); e.target.value='';
 }
 
-// ═══════════════════════════════════════
-//   DRAW
-// ═══════════════════════════════════════
+/* ═══════════════════════════════════
+   DRAW
+═══════════════════════════════════ */
 function initDraw() {
   if (!members.length) { toast('회원을 먼저 등록하세요'); return; }
-  poolIds = members.map(m => m.id);
-  groups  = [makeGroup(1), makeGroup(2), makeGroup(3)];
+  poolIds = members.map(m=>m.id);
+  groups  = [mkGroup(1),mkGroup(2),mkGroup(3)];
   renderDraw();
-  toast('조편성 시작! + 버튼 또는 끌어서 조에 넣으세요 🏌️');
+  toast('+ 버튼으로 조에 배정하세요 🏌️');
 }
-
-function makeGroup(n) {
-  return { id: 'g' + uid(), label: n + '조', teeTime: '', memberIds: [] };
-}
+function mkGroup(n) { return {id:'g'+uid(), label:n+'조', teeTime:'', memberIds:[]}; }
 function addGroup() {
   if (!groups.length) { initDraw(); return; }
-  groups.push(makeGroup(groups.length + 1));
-  renderDraw();
+  groups.push(mkGroup(groups.length+1)); renderDraw();
 }
 function removeLastGroup() {
   if (!groups.length) return;
   const last = groups.pop();
-  last.memberIds.forEach(id => { if (!poolIds.includes(id)) poolIds.push(id); });
+  last.memberIds.forEach(id=>{ if (!poolIds.includes(id)) poolIds.push(id); });
   renderDraw();
 }
+function renderDraw() { renderPool(); renderGroups(); }
 
-function renderDraw() {
-  renderPool();
-  renderGroups();
-}
-
-/* ── Pool ── */
+/* ── Pool (left, tap only) ── */
 function renderPool() {
-  const cnt = document.getElementById('pool-count');
-  cnt.textContent = poolIds.length ? '(' + poolIds.length + ')' : '(없음)';
-
+  document.getElementById('pool-count').textContent = poolIds.length ? '('+poolIds.length+')' : '(없음)';
   const el = document.getElementById('pool-list');
   if (!poolIds.length) {
     el.innerHTML = '<div class="empty-state" style="padding:20px 0"><div class="ei">✅</div><p style="font-size:12px">모두 배정됨</p></div>';
     return;
   }
   el.innerHTML = poolIds.map(id => {
-    const m = members.find(x => x.id === id);
-    if (!m) return '';
-    const f = m.gender === 'female';
-    return `<div class="pool-row ${f?'female':''}"
-      data-id="${m.id}" data-src="pool"
-      draggable="true"
-      ondragstart="onDragStart(event,'${m.id}','pool')"
-      ondragend="onDragEnd(event)"
-      ontouchstart="onTouchStart(event,'${m.id}','pool')"
-      ontouchmove="onTouchMove(event)"
-      ontouchend="onTouchEnd(event)">
-      <div style="flex:1;min-width:0">
+    const m = members.find(x=>x.id===id); if (!m) return '';
+    const f = m.gender==='female';
+    return `<div class="pool-row ${f?'female':''}">
+      <div class="pr-info">
         <div class="pr-name">${m.name}${f?'*':''}</div>
         <div class="pr-sub">${m.nickname||''} H${m.handy||0}</div>
       </div>
-      <button class="pr-add" onclick="openPickModal('${m.id}')" title="조 선택">＋</button>
+      <button class="pr-add" onclick="openPick('${m.id}')">＋</button>
     </div>`;
   }).join('');
-
-  // pool drop zone
-  const scroll = document.getElementById('pool-scroll');
-  scroll.ondragover  = e => { e.preventDefault(); scroll.style.background='#e8f5e9'; };
-  scroll.ondragleave = e => { scroll.style.background = ''; };
-  scroll.ondrop      = e => { e.preventDefault(); scroll.style.background=''; onDrop('pool'); };
+  // No touch events on pool rows — pure scroll
 }
 
-/* ── Groups ── */
+/* ── Groups (right, drag between groups) ── */
 function renderGroups() {
   const el = document.getElementById('groups-container');
   if (!groups.length) {
-    el.innerHTML = '<div class="empty-state"><div class="ei">⛳</div><p>조편성 시작 버튼을 눌러주세요</p></div>';
+    el.innerHTML = '<div class="empty-state"><div class="ei">⛳</div><p>조편성 시작을 눌러주세요</p></div>';
     return;
   }
   el.innerHTML = groups.map(g => {
-    const cnt  = g.memberIds.length;
-    const full = cnt >= 4;
-    const members_html = g.memberIds.map(id => {
-      const m = members.find(x => x.id === id);
-      if (!m) return '';
-      const f = m.gender === 'female';
-      return `<div class="gm-row ${f?'female':''}"
-        data-id="${m.id}" data-src="${g.id}"
-        draggable="true"
-        ondragstart="onDragStart(event,'${m.id}','${g.id}')"
-        ondragend="onDragEnd(event)"
-        ontouchstart="onTouchStart(event,'${m.id}','${g.id}')"
-        ontouchmove="onTouchMove(event)"
-        ontouchend="onTouchEnd(event)">
+    const cnt = g.memberIds.length;
+    const rows = g.memberIds.map(id => {
+      const m = members.find(x=>x.id===id); if (!m) return '';
+      const f = m.gender==='female';
+      return `<div class="gm-row ${f?'female':''}" data-id="${m.id}" data-gid="${g.id}">
         <div style="flex:1;min-width:0">
           <div class="gm-name">${m.name}${f?'*':''}</div>
           <div class="gm-sub">H${m.handy||0}</div>
         </div>
-        <button class="gm-rm" onclick="removeMemberFromGroup('${g.id}','${m.id}')" title="빼기">✕</button>
+        <button class="gm-rm" onclick="returnToPool('${g.id}','${m.id}')">✕</button>
       </div>`;
     }).join('');
-
-    return `<div class="group-card" id="gc-${g.id}"
-        ondragover="onDragOver(event,'${g.id}')"
-        ondragleave="onDragLeave(event,'${g.id}')"
-        ondrop="onDropGroup(event,'${g.id}')">
-      <div class="group-head">
+    return `<div class="group-card" id="gc-${g.id}">
+      <div class="g-head">
         <h3>⛳ ${g.label}</h3>
-        <input class="tee-input" type="time" value="${g.teeTime}" placeholder="티타임"
-          onchange="setTeeTime('${g.id}',this.value)" />
-        <span class="g-count ${full?'full':''}">${cnt}/4</span>
+        <input class="tee-input" type="time" value="${g.teeTime}" placeholder="티타임" onchange="setTee('${g.id}',this.value)"/>
+        <span class="g-cnt ${cnt>=4?'full':''}">${cnt}/4</span>
       </div>
-      <div class="group-body" id="gb-${g.id}">
-        ${members_html || '<div class="empty-hint">여기에 회원을 끌어오거나<br>+ 버튼으로 추가하세요</div>'}
+      <div class="g-body" id="gb-${g.id}">
+        ${rows || '<div class="g-empty">+ 버튼으로 회원을 추가하세요</div>'}
       </div>
     </div>`;
   }).join('');
+
+  attachGroupDrag();
 }
 
-/* ── Pick Modal (tap + to choose group) ── */
-function openPickModal(memberId) {
-  if (!groups.length) { toast('조편성을 먼저 시작하세요'); return; }
-  pickingMemberId = memberId;
-  const m = members.find(x => x.id === memberId);
-  document.getElementById('pick-title').textContent = (m.name) + (m.gender==='female'?'*':'') + ' — 조 선택';
-  document.getElementById('pick-sub').textContent   = '배정할 조를 선택하세요';
+function setTee(gid,val) { const g=groups.find(x=>x.id===gid); if(g) g.teeTime=val; }
 
-  const list = document.getElementById('pick-group-list');
-  list.innerHTML = groups.map(g => {
-    const cnt  = g.memberIds.length;
-    const full = cnt >= 4;
-    return `<button class="pick-group-btn ${full?'disabled':''}" onclick="assignToGroup('${g.id}')">
-      <span>⛳ ${g.label}${g.teeTime ? ' · ' + g.teeTime : ''}</span>
-      <span class="pgb-right">${cnt}/4${full?' (마감)':''}</span>
-    </button>`;
-  }).join('');
-
-  document.getElementById('pick-modal').classList.add('open');
-}
-
-function assignToGroup(gid) {
-  if (!pickingMemberId) return;
-  const g = groups.find(x => x.id === gid);
-  if (!g || g.memberIds.length >= 4) { toast('해당 조는 이미 4명입니다'); return; }
-  poolIds = poolIds.filter(x => x !== pickingMemberId);
-  // also remove from any other group just in case
-  groups.forEach(gr => { gr.memberIds = gr.memberIds.filter(x => x !== pickingMemberId); });
-  g.memberIds.push(pickingMemberId);
-  pickingMemberId = null;
-  closeModal('pick-modal');
-  renderDraw();
-}
-
-function removeMemberFromGroup(gid, mid) {
-  const g = groups.find(x => x.id === gid);
-  if (!g) return;
-  g.memberIds = g.memberIds.filter(x => x !== mid);
+function returnToPool(gid, mid) {
+  const g = groups.find(x=>x.id===gid); if (!g) return;
+  g.memberIds = g.memberIds.filter(x=>x!==mid);
   if (!poolIds.includes(mid)) poolIds.push(mid);
   renderDraw();
 }
 
-function setTeeTime(gid, val) {
-  const g = groups.find(x => x.id === gid);
-  if (g) g.teeTime = val;
+/* ═══════════════════════════════════
+   PICK MODAL  (pool → group)
+   Triggered by + button in left panel
+═══════════════════════════════════ */
+function openPick(mid) {
+  if (!groups.length) { toast('조편성을 먼저 시작하세요'); return; }
+  pickMid = mid;
+  const m = members.find(x=>x.id===mid);
+  document.getElementById('pick-title').textContent = (m.name)+(m.gender==='female'?'*':'')+' → 조 선택';
+  document.getElementById('pick-list').innerHTML = groups.map(g => {
+    const cnt=g.memberIds.length, full=cnt>=4;
+    return `<button class="pg-btn ${full?'disabled':''}" onclick="assignPick('${g.id}')">
+      <span>⛳ ${g.label}${g.teeTime?' · '+g.teeTime:''}</span>
+      <span class="pg-right">${cnt}/4${full?' (마감)':''}</span>
+    </button>`;
+  }).join('');
+  document.getElementById('pick-modal').classList.add('open');
+}
+function assignPick(gid) {
+  if (!pickMid) return;
+  const g = groups.find(x=>x.id===gid);
+  if (!g||g.memberIds.length>=4) { toast('해당 조는 이미 4명입니다'); return; }
+  poolIds = poolIds.filter(x=>x!==pickMid);
+  groups.forEach(gr=>{ gr.memberIds=gr.memberIds.filter(x=>x!==pickMid); });
+  g.memberIds.push(pickMid);
+  pickMid=null; closeModal('pick-modal'); renderDraw();
 }
 
-// ═══════════════════════════════════════
-//   DRAG & DROP — DESKTOP
-// ═══════════════════════════════════════
-function onDragStart(e, id, src) {
-  dragId = id; dragFrom = src;
-  e.dataTransfer.effectAllowed = 'move';
-  setTimeout(() => {
-    const el = document.querySelector(`[data-id="${id}"]`);
-    if (el) el.classList.add('dragging');
-  }, 0);
-}
-function onDragEnd(e) {
-  document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
-  dragId = null; dragFrom = null;
-}
-function onDragOver(e, gid) {
-  e.preventDefault();
-  document.getElementById('gc-' + gid).classList.add('drag-over');
-}
-function onDragLeave(e, gid) {
-  document.getElementById('gc-' + gid).classList.remove('drag-over');
-}
-function onDropGroup(e, gid) {
-  e.preventDefault();
-  document.getElementById('gc-' + gid).classList.remove('drag-over');
-  if (!dragId) return;
-  moveMember(dragId, dragFrom, gid);
-}
-function onDrop(target) {
-  if (!dragId) return;
-  moveMember(dragId, dragFrom, target);
+/* ═══════════════════════════════════
+   DRAG BETWEEN GROUPS
+   Long-press (300ms) activates drag on gm-row items.
+   This does NOT conflict with left-panel scroll because
+   the left panel has no drag events at all.
+═══════════════════════════════════ */
+function attachGroupDrag() {
+  document.querySelectorAll('.gm-row').forEach(row => {
+    // ── Mouse (desktop) ──
+    row.addEventListener('mousedown', e => {
+      if (e.target.classList.contains('gm-rm')) return;
+      startGroupDrag(row.dataset.id, row.dataset.gid, e.clientX, e.clientY, 'mouse');
+    });
+
+    // ── Touch (mobile) — long press ──
+    let lpTimer = null;
+    row.addEventListener('touchstart', e => {
+      if (e.target.classList.contains('gm-rm')) return;
+      const t = e.touches[0];
+      lpTimer = setTimeout(() => {
+        row.classList.add('pressing');
+        // small vibration cue if available
+        if (navigator.vibrate) navigator.vibrate(30);
+        startGroupDrag(row.dataset.id, row.dataset.gid, t.clientX, t.clientY, 'touch');
+      }, 300);
+    }, {passive:true});
+    row.addEventListener('touchend',   () => { clearTimeout(lpTimer); row.classList.remove('pressing'); }, {passive:true});
+    row.addEventListener('touchcancel',() => { clearTimeout(lpTimer); row.classList.remove('pressing'); }, {passive:true});
+  });
 }
 
-// ═══════════════════════════════════════
-//   DRAG & DROP — TOUCH (MOBILE)
-// ═══════════════════════════════════════
-let touchDragging = false;
+/* ── Drag core ── */
+let _dmx=0,_dmy=0, _dmMode='';
+function startGroupDrag(id, gid, cx, cy, mode) {
+  dragId=id; dragFrom=gid; _dmx=cx; _dmy=cy; _dmMode=mode;
+  const ghost = document.getElementById('drag-ghost');
+  const m = members.find(x=>x.id===id);
+  if (!m) return;
+  const f = m.gender==='female';
+  ghost.textContent = (f?'👩':'👨')+' '+m.name+(f?'*':'');
+  ghost.style.display='block';
+  ghost.style.left=(cx-50)+'px'; ghost.style.top=(cy-20)+'px';
 
-function onTouchStart(e, id, src) {
-  // only initiate drag if finger moves significantly
-  dragId = id; dragFrom = src; touchDragging = false;
-  const t = e.touches[0];
-  _txStart = t.clientX; _tyStart = t.clientY;
-}
-let _txStart = 0, _tyStart = 0;
+  document.querySelector(`[data-id="${id}"]`)?.classList.add('dragging');
 
-function onTouchMove(e) {
-  const t = e.touches[0];
-  const dx = Math.abs(t.clientX - _txStart);
-  const dy = Math.abs(t.clientY - _tyStart);
-
-  if (!touchDragging && (dx > 8 || dy > 8)) {
-    touchDragging = true;
-    const src = document.querySelector(`[data-id="${dragId}"]`);
-    if (src) src.classList.add('dragging');
-
-    const ghost = document.getElementById('drag-ghost');
-    ghost.innerHTML = src ? src.cloneNode(true).outerHTML : '';
-    ghost.style.display = 'block';
+  if (mode==='mouse') {
+    window.addEventListener('mousemove', onGDragMove);
+    window.addEventListener('mouseup',   onGDragEnd);
+  } else {
+    window.addEventListener('touchmove', onGDragMoveT, {passive:false});
+    window.addEventListener('touchend',  onGDragEndT);
   }
-  if (!touchDragging) return;
-
-  e.preventDefault();
-  const ghost = document.getElementById('drag-ghost');
-  ghost.style.left = (t.clientX - 40) + 'px';
-  ghost.style.top  = (t.clientY - 20) + 'px';
-
-  // highlight drop target
-  document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-  ghost.style.display = 'none';
-  const under = document.elementFromPoint(t.clientX, t.clientY);
-  ghost.style.display = 'block';
-  const gc = under && under.closest('.group-card');
-  if (gc) gc.classList.add('drag-over');
 }
 
-function onTouchEnd(e) {
-  const ghost = document.getElementById('drag-ghost');
-  ghost.style.display = 'none';
-  document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
-  document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+function onGDragMove(e) { moveGhost(e.clientX, e.clientY); highlightTarget(e.clientX,e.clientY); }
+function onGDragMoveT(e) {
+  e.preventDefault();
+  const t=e.touches[0];
+  moveGhost(t.clientX,t.clientY); highlightTarget(t.clientX,t.clientY);
+}
+function moveGhost(cx,cy) {
+  const g=document.getElementById('drag-ghost');
+  g.style.left=(cx-50)+'px'; g.style.top=(cy-20)+'px';
+}
+function highlightTarget(cx,cy) {
+  document.querySelectorAll('.group-card.drop-active').forEach(el=>el.classList.remove('drop-active'));
+  const ghost=document.getElementById('drag-ghost');
+  ghost.style.display='none';
+  const under=document.elementFromPoint(cx,cy);
+  ghost.style.display='block';
+  const gc=under&&under.closest('.group-card');
+  if (gc) gc.classList.add('drop-active');
+}
 
-  if (!touchDragging || !dragId) { dragId = null; dragFrom = null; touchDragging = false; return; }
+function onGDragEnd(e)  { finishGroupDrag(e.clientX, e.clientY); window.removeEventListener('mousemove',onGDragMove); window.removeEventListener('mouseup',onGDragEnd); }
+function onGDragEndT(e) {
+  const t=e.changedTouches[0];
+  finishGroupDrag(t.clientX,t.clientY);
+  window.removeEventListener('touchmove',onGDragMoveT);
+  window.removeEventListener('touchend',onGDragEndT);
+}
 
-  const t = e.changedTouches[0];
-  ghost.style.display = 'none';
-  const under = document.elementFromPoint(t.clientX, t.clientY);
-  ghost.style.display = 'none';
+function finishGroupDrag(cx,cy) {
+  const ghost=document.getElementById('drag-ghost');
+  ghost.style.display='none';
+  document.querySelectorAll('.gm-row.dragging').forEach(el=>el.classList.remove('dragging','pressing'));
+  document.querySelectorAll('.group-card.drop-active').forEach(el=>el.classList.remove('drop-active'));
 
-  const gc = under && under.closest('.group-card');
-  const isPool = under && under.closest('#pool-scroll');
+  if (!dragId) return;
 
-  let target = null;
+  ghost.style.display='none';
+  const under=document.elementFromPoint(cx,cy);
+  ghost.style.display='none';
+  const gc=under&&under.closest('.group-card');
   if (gc) {
-    // extract group id from gc id attr: "gc-GGGGG"
-    target = gc.id.replace('gc-', '');
-  } else if (isPool) {
-    target = 'pool';
+    const toGid=gc.id.replace('gc-','');
+    if (toGid!==dragFrom) {
+      const tg=groups.find(g=>g.id===toGid);
+      if (!tg) { dragId=null; return; }
+      if (tg.memberIds.length>=4) { toast('⚠️ 해당 조는 이미 4명입니다'); dragId=null; return; }
+      // move
+      const sg=groups.find(g=>g.id===dragFrom);
+      if (sg) sg.memberIds=sg.memberIds.filter(x=>x!==dragId);
+      tg.memberIds.push(dragId);
+      renderDraw();
+    }
   }
-
-  if (target) moveMember(dragId, dragFrom, target);
-
-  dragId = null; dragFrom = null; touchDragging = false;
+  dragId=null; dragFrom=null;
 }
 
-// ═══════════════════════════════════════
-//   MOVE LOGIC
-// ═══════════════════════════════════════
-function moveMember(id, from, to) {
-  if (from === to) return;
-
-  // Capacity check
-  if (to !== 'pool') {
-    const tg = groups.find(g => g.id === to);
-    if (!tg) return;
-    if (tg.memberIds.length >= 4) { toast('⚠️ 해당 조는 이미 4명입니다'); return; }
-  }
-
-  // Remove from source
-  if (from === 'pool') { poolIds = poolIds.filter(x => x !== id); }
-  else { const sg = groups.find(g => g.id === from); if (sg) sg.memberIds = sg.memberIds.filter(x => x !== id); }
-
-  // Add to target
-  if (to === 'pool') { poolIds.push(id); }
-  else { const tg = groups.find(g => g.id === to); if (tg) tg.memberIds.push(id); }
-
-  renderDraw();
-}
-
-// ═══════════════════════════════════════
-//   OUTPUT
-// ═══════════════════════════════════════
+/* ═══════════════════════════════════
+   OUTPUT
+═══════════════════════════════════ */
 function generateOutput() {
   if (!groups.length) { toast('조편성을 먼저 하세요'); return; }
-
-  const date = new Date().toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric', weekday:'short' });
-  let sub = `📅 ${date}\n\n`;
-  let mgr = `📅 ${date}\n\n`;
-
-  groups.forEach(g => {
-    const tee = g.teeTime ? ` (티타임 ${g.teeTime})` : '';
-    sub += `▶ ${g.label}${tee}\n`;
-    mgr += `▶ ${g.label}${tee}\n`;
-    if (!g.memberIds.length) { sub += '  (없음)\n'; mgr += '  (없음)\n'; }
-    else g.memberIds.forEach((id, i) => {
-      const m = members.find(x => x.id === id); if (!m) return;
-      const star = m.gender === 'female' ? '*' : '';
-      sub += `  ${i+1}. ${m.name}${star}(${m.phone})\n`;
-      mgr += `  ${i+1}. ${m.nickname||m.name} ${m.name}${star} H${m.handy||0} [${m.gender==='female'?'여':'남'}]\n`;
+  const date=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+  let sub=`📅 ${date}\n\n`, mgr=`📅 ${date}\n\n`;
+  groups.forEach(g=>{
+    const tee=g.teeTime?` (티타임 ${g.teeTime})`:'';
+    sub+=`▶ ${g.label}${tee}\n`; mgr+=`▶ ${g.label}${tee}\n`;
+    if (!g.memberIds.length) { sub+='  (없음)\n'; mgr+='  (없음)\n'; }
+    else g.memberIds.forEach((id,i)=>{
+      const m=members.find(x=>x.id===id); if(!m) return;
+      const s=m.gender==='female'?'*':'';
+      sub+=`  ${i+1}. ${m.name}${s}(${m.phone})\n`;
+      mgr+=`  ${i+1}. ${m.nickname||m.name} ${m.name}${s} H${m.handy||0} [${m.gender==='female'?'여':'남'}]\n`;
     });
-    sub += '\n'; mgr += '\n';
+    sub+='\n'; mgr+='\n';
   });
-
   if (poolIds.length) {
-    const names = poolIds.map(id => members.find(x=>x.id===id)?.name||'?').join(', ');
-    sub += `⚠️ 미배정: ${names}`;
-    mgr += `⚠️ 미배정: ${names}`;
+    const ns=poolIds.map(id=>members.find(x=>x.id===id)?.name||'?').join(', ');
+    sub+=`⚠️ 미배정: ${ns}`; mgr+=`⚠️ 미배정: ${ns}`;
   }
-
-  document.getElementById('submit-output').textContent = sub;
-  document.getElementById('manage-output').textContent = mgr;
+  document.getElementById('submit-output').textContent=sub;
+  document.getElementById('manage-output').textContent=mgr;
 }
 
-function copyOutput(type) {
-  const id = type === 'submit' ? 'submit-output' : 'manage-output';
-  const text = document.getElementById(id).textContent;
-  if (text.includes('조편성 후')) { toast('먼저 결과를 생성하세요'); return; }
-  navigator.clipboard.writeText(text).then(() => toast('복사 완료 📋'));
+function copyOut(type) {
+  const id=type==='submit'?'submit-output':'manage-output';
+  const text=document.getElementById(id).textContent;
+  if (text.includes('결과보기')) { toast('먼저 결과보기를 눌러주세요'); return; }
+  navigator.clipboard.writeText(text).then(()=>toast('복사 완료 📋'));
 }
 
 function saveResult() {
-  const sub = document.getElementById('submit-output').textContent;
-  if (sub.includes('조편성 후')) { toast('먼저 결과를 생성하세요'); return; }
-  const data = {
-    date: new Date().toISOString(),
-    groups: groups.map(g => ({
-      label: g.label, teeTime: g.teeTime,
-      members: g.memberIds.map(id => members.find(x=>x.id===id)).filter(Boolean)
-    })),
-    submitOutput: sub,
-    manageOutput: document.getElementById('manage-output').textContent
-  };
-  dl(JSON.stringify(data, null, 2), `골프조편성_${new Date().toLocaleDateString('ko-KR').replace(/\.\s*/g,'').replace(/ /g,'')}.json`);
+  const sub=document.getElementById('submit-output').textContent;
+  if (sub.includes('결과보기')) { toast('먼저 결과보기를 눌러주세요'); return; }
+  dl(JSON.stringify({
+    date:new Date().toISOString(),
+    groups:groups.map(g=>({label:g.label,teeTime:g.teeTime,members:g.memberIds.map(id=>members.find(x=>x.id===id)).filter(Boolean)})),
+    submitOutput:sub,
+    manageOutput:document.getElementById('manage-output').textContent
+  },null,2), `골프조편성_${new Date().toLocaleDateString('ko-KR').replace(/\.\s*/g,'').replace(/ /g,'')}.json`);
   toast('저장 완료 💾');
 }
 
-// ═══════════════════════════════════════
-//   UTILS
-// ═══════════════════════════════════════
-function uid() { return Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4); }
+/* ═══════════════════════════════════
+   UTILS
+═══════════════════════════════════ */
+function uid() { return Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4); }
 function fmtPhone(p) {
-  const d = p.replace(/\D/g,'');
-  if (d.length === 11) return d.replace(/(\d{3})(\d{4})(\d{4})/,'$1-$2-$3');
-  if (d.length === 10) return d.replace(/(\d{3})(\d{3})(\d{4})/,'$1-$2-$3');
+  const d=p.replace(/\D/g,'');
+  if (d.length===11) return d.replace(/(\d{3})(\d{4})(\d{4})/,'$1-$2-$3');
+  if (d.length===10) return d.replace(/(\d{3})(\d{3})(\d{4})/,'$1-$2-$3');
   return p;
 }
-function dl(text, name) {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([text], { type:'application/json' }));
-  a.download = name; a.click();
+function dl(text,name) {
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([text],{type:'application/json'}));
+  a.download=name; a.click();
 }
 function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  clearTimeout(t._t);
-  t._t = setTimeout(() => t.classList.remove('show'), 2200);
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2300);
 }
 
-// Tap outside modals to close
-document.getElementById('member-modal').addEventListener('click', function(e) { if(e.target===this) closeModal('member-modal'); });
-document.getElementById('pick-modal').addEventListener('click', function(e) { if(e.target===this) closeModal('pick-modal'); });
+/* close modals on backdrop tap */
+['m-modal','pick-modal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){ if(e.target===this) closeModal(id); });
+});
 
-// Init
+/* init */
 renderMembers();
 </script>
 
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(()=>{});
-  });
+  window.addEventListener('load', ()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
 </script>
 </body>
